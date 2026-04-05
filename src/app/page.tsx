@@ -23,15 +23,34 @@ export default function Home() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [categoriesData, productsData] = await Promise.all([
+      
+      // Charger les données en parallèle avec gestion d'erreur individuelle
+      const [categoriesData, productsData] = await Promise.allSettled([
         categoryService.getMainCategories(),
         productService.getProducts({ limit: 8, sortBy: 'newest' })
       ]);
       
-      setCategories(categoriesData.slice(0, 6));
-      setFeaturedProducts(productsData.products);
+      // Traiter les catégories
+      if (categoriesData.status === 'fulfilled') {
+        setCategories((categoriesData.value || []).slice(0, 6));
+      } else {
+        console.warn('Erreur chargement catégories:', categoriesData.reason);
+        setCategories([]);
+      }
+      
+      // Traiter les produits
+      if (productsData.status === 'fulfilled') {
+        setFeaturedProducts(productsData.value?.products || []);
+      } else {
+        console.warn('Erreur chargement produits:', productsData.reason);
+        setFeaturedProducts([]);
+      }
+      
     } catch (error) {
-      console.error('Erreur chargement données accueil:', error);
+      console.error('Erreur globale chargement données accueil:', error);
+      // S'assurer que les states sont initialisés même en cas d'erreur
+      setCategories([]);
+      setFeaturedProducts([]);
     } finally {
       setLoading(false);
     }
@@ -151,7 +170,7 @@ export default function Home() {
                 </div>
               ))}
             </div>
-          ) : (
+          ) : categories.length > 0 ? (
             <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {categories.map((category, index) => (
                 <motion.div
@@ -171,7 +190,7 @@ export default function Home() {
                             {category.name}
                           </h3>
                           <p className="text-sm text-gray-500">
-                            {category.productCount} produits
+                            {category.productCount || 0} produits
                           </p>
                         </div>
                       </div>
@@ -188,6 +207,18 @@ export default function Home() {
                   </Link>
                 </motion.div>
               ))}
+            </div>
+          ) : (
+            <div className="mt-12 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Package className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Catégories en cours de chargement
+              </h3>
+              <p className="text-gray-600">
+                Nos catégories seront bientôt disponibles.
+              </p>
             </div>
           )}
 
@@ -221,9 +252,9 @@ export default function Home() {
                 <div key={index} className="bg-gray-100 rounded-lg h-96 animate-pulse"></div>
               ))}
             </div>
-          ) : (
+          ) : featuredProducts.length > 0 ? (
             <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              {featuredProducts.slice(0, 4).map((product, index) => (
+              {(featuredProducts || []).slice(0, 4).map((product, index) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -233,6 +264,18 @@ export default function Home() {
                   <ProductCard product={product} />
                 </motion.div>
               ))}
+            </div>
+          ) : (
+            <div className="mt-12 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Package className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Produits bientôt disponibles
+              </h3>
+              <p className="text-gray-600">
+                Notre catalogue de produits sera bientôt enrichi.
+              </p>
             </div>
           )}
 

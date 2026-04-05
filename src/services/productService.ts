@@ -41,14 +41,15 @@ export class ProductService {
       
       const data = response.data.data;
       
-      if (!data) {
+      if (!data || !Array.isArray(data.products)) {
+        console.warn('API produits: données invalides, utilisation du fallback');
         return this.getFallbackProducts(params);
       }
       
       return data;
     } catch (error: any) {
-      // En cas d'erreur API, retourner des données de fallback
-      console.warn('Erreur lors du chargement des produits:', apiService.handleApiError(error));
+      // En cas d'erreur API, retourner systématiquement des données de fallback
+      console.warn('API produits indisponible, utilisation des données de fallback:', apiService.handleApiError(error));
       
       // Retourner des données de fallback pour le développement
       return this.getFallbackProducts(params);
@@ -120,6 +121,8 @@ export class ProductService {
   // === DONNÉES DE FALLBACK POUR LE DÉVELOPPEMENT ===
   
   private getFallbackProducts(params: GetProductsParams): ProductsResponse {
+    console.info('Utilisation des données de fallback pour les produits');
+    
     const fallbackProducts: Product[] = [
       {
         id: '1',
@@ -195,17 +198,93 @@ export class ProductService {
         },
         createdAt: '2024-02-01T10:00:00Z',
         updatedAt: '2024-02-01T10:00:00Z'
+      },
+      {
+        id: '3',
+        name: 'Thermomètre Infrarouge Braun ThermoScan',
+        slug: 'thermometre-braun-thermoscan',
+        description: 'Thermomètre auriculaire professionnel avec technologie infrarouge de précision.',
+        shortDescription: 'Thermomètre infrarouge professionnel',
+        price: 89.99,
+        originalPrice: 109.99,
+        categoryId: '1',
+        category: {
+          id: '1',
+          name: 'Diagnostic',
+          slug: 'diagnostic',
+          isActive: true
+        },
+        brand: 'Braun',
+        images: [
+          '/images/thermometre-1.jpg'
+        ],
+        stock: 30,
+        rating: 4.7,
+        reviewsCount: 95,
+        isNew: true,
+        discount: 18,
+        features: [
+          'Mesure en 1 seconde',
+          'Technologie Age Precision',
+          'Embouts jetables inclus',
+          'Mémoire 9 mesures'
+        ],
+        specifications: {
+          precision: '±0.2°C',
+          display: 'LCD rétroéclairé',
+          age_ranges: '0-3M, 3-36M, 36M+'
+        },
+        createdAt: '2024-03-01T10:00:00Z',
+        updatedAt: '2024-03-01T10:00:00Z'
+      },
+      {
+        id: '4',
+        name: 'Oxymètre de pouls Nonin PalmSAT',
+        slug: 'oxymetre-nonin-palmsat',
+        description: 'Oxymètre de pouls portable avec affichage numérique et courbe de pléthysmographie.',
+        shortDescription: 'Oxymètre de pouls portable',
+        price: 245.00,
+        categoryId: '1',
+        category: {
+          id: '1',
+          name: 'Diagnostic',
+          slug: 'diagnostic',
+          isActive: true
+        },
+        brand: 'Nonin',
+        images: [
+          '/images/oxymetre-1.jpg'
+        ],
+        stock: 12,
+        rating: 4.9,
+        reviewsCount: 67,
+        isNew: false,
+        features: [
+          'Mesure SpO2 et fréquence cardiaque',
+          'Affichage plethysmographique',
+          'Batterie rechargeable',
+          'Certification médicale'
+        ],
+        specifications: {
+          accuracy_spo2: '±2%',
+          accuracy_pulse: '±3 bpm',
+          battery: 'Lithium rechargeable',
+          weight: '142g'
+        },
+        createdAt: '2024-01-20T10:00:00Z',
+        updatedAt: '2024-01-20T10:00:00Z'
       }
     ];
 
-    // Appliquer les filtres de base
+    // Appliquer les filtres de base de manière sécurisée
     let filtered = [...fallbackProducts];
     
     if (params.search) {
       const searchTerm = params.search.toLowerCase();
       filtered = filtered.filter(product => 
         product.name.toLowerCase().includes(searchTerm) ||
-        product.description.toLowerCase().includes(searchTerm)
+        product.description.toLowerCase().includes(searchTerm) ||
+        (product.brand && product.brand.toLowerCase().includes(searchTerm))
       );
     }
 
@@ -213,7 +292,44 @@ export class ProductService {
       filtered = filtered.filter(product => product.categoryId === params.category);
     }
 
-    // Pagination
+    if (params.priceMin !== undefined) {
+      filtered = filtered.filter(product => product.price >= params.priceMin!);
+    }
+
+    if (params.priceMax !== undefined) {
+      filtered = filtered.filter(product => product.price <= params.priceMax!);
+    }
+
+    if (params.brands && params.brands.length > 0) {
+      filtered = filtered.filter(product => 
+        product.brand && params.brands!.includes(product.brand)
+      );
+    }
+
+    // Tri sécurisé
+    if (params.sortBy) {
+      switch (params.sortBy) {
+        case 'price_asc':
+          filtered.sort((a, b) => a.price - b.price);
+          break;
+        case 'price_desc':
+          filtered.sort((a, b) => b.price - a.price);
+          break;
+        case 'name_asc':
+          filtered.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'name_desc':
+          filtered.sort((a, b) => b.name.localeCompare(a.name));
+          break;
+        case 'newest':
+          filtered.sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+          break;
+      }
+    }
+
+    // Pagination sécurisée
     const page = params.page || 1;
     const limit = params.limit || 24;
     const startIndex = (page - 1) * limit;

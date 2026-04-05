@@ -7,15 +7,16 @@ export const categoryService = {
       const response = await apiService.get<ApiResponse<Category[]>>('/categories');
       const categories = response.data.data;
       
-      if (!categories) {
+      if (!categories || !Array.isArray(categories)) {
+        console.warn('API catégories: données invalides, utilisation du fallback');
         return this.getFallbackCategories();
       }
       
       return categories.filter(cat => cat.isActive);
     } catch (error: any) {
-      console.warn('Erreur lors du chargement des catégories:', apiService.handleApiError(error));
+      console.warn('API catégories indisponible, utilisation des données de fallback:', apiService.handleApiError(error));
       
-      // Retourner des données de fallback
+      // Retourner systématiquement des données de fallback
       return this.getFallbackCategories();
     }
   },
@@ -76,20 +77,33 @@ export const categoryService = {
 
   async getMainCategories(): Promise<Category[]> {
     try {
+      // Essayer d'abord l'endpoint spécifique main
       const response = await apiService.get<ApiResponse<Category[]>>('/categories/main');
       const categories = response.data.data;
       
-      if (!categories) {
-        return this.getFallbackCategories().filter(cat => !cat.parentId);
+      if (!categories || !Array.isArray(categories)) {
+        console.warn('Endpoint /categories/main indisponible, fallback vers toutes les catégories');
+        return this.getMainCategoriesFallback();
       }
       
       return categories.filter(cat => cat.isActive);
     } catch (error: any) {
-      console.warn('Erreur lors du chargement des catégories principales:', apiService.handleApiError(error));
+      console.warn('API catégories principales indisponible:', apiService.handleApiError(error));
       
-      // Retourner les catégories principales de fallback
-      return this.getFallbackCategories().filter(cat => !cat.parentId);
+      // Essayer de récupérer toutes les catégories et filtrer
+      try {
+        const allCategories = await this.getCategories();
+        return allCategories.filter(cat => !cat.parentId);
+      } catch (fallbackError) {
+        console.warn('Fallback vers données locales pour catégories principales');
+        return this.getMainCategoriesFallback();
+      }
     }
+  },
+
+  // Fallback spécifique pour les catégories principales
+  getMainCategoriesFallback(): Category[] {
+    return this.getFallbackCategories().filter(cat => !cat.parentId);
   },
 
   async getSubCategories(parentId: string): Promise<Category[]> {
