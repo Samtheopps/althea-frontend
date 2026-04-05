@@ -1,65 +1,280 @@
-import Image from "next/image";
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { ArrowRight, Shield, Truck, HeadphonesIcon, Package, Star } from 'lucide-react';
+
+import { Category, Product } from '@/types/api';
+import { categoryService } from '@/services/categoryService';
+import { productService } from '@/services/productService';
+import ProductCard from '@/components/products/ProductCard';
+import { formatPrice } from '@/lib/utils';
 
 export default function Home() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [categoriesData, productsData] = await Promise.all([
+        categoryService.getMainCategories(),
+        productService.getProducts({ limit: 8, sortBy: 'newest' })
+      ]);
+      
+      setCategories(categoriesData.slice(0, 6));
+      setFeaturedProducts(productsData.products);
+    } catch (error) {
+      console.error('Erreur chargement données accueil:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-primary-light via-white to-primary-light py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-heading font-bold tracking-tight text-gray-900 sm:text-6xl">
+              Équipements Médicaux
+              <span className="block text-gradient">
+                de Haute Qualité
+              </span>
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600">
+              Althea Systems fournit des équipements médicaux de pointe pour les professionnels de santé. 
+              Découvrez notre gamme complète de produits certifiés et fiables.
+            </p>
+            <div className="mt-10 flex items-center justify-center gap-x-6">
+              <Link
+                href="/products"
+                className="btn-primary inline-flex items-center gap-2"
+              >
+                Découvrir nos produits
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/about"
+                className="text-sm font-semibold leading-6 text-gray-900 hover:text-primary transition-colors"
+              >
+                En savoir plus <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-heading font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Pourquoi choisir Althea Systems ?
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Notre engagement pour votre réussite
+            </p>
+          </div>
+
+          <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="text-center">
+              <div className="flex justify-center">
+                <div className="rounded-lg bg-primary/10 p-3">
+                  <Shield className="h-8 w-8 text-primary" />
+                </div>
+              </div>
+              <h3 className="mt-4 text-xl font-semibold text-gray-900">
+                Qualité Certifiée
+              </h3>
+              <p className="mt-2 text-gray-600">
+                Tous nos équipements sont certifiés CE, FDA et conformes aux normes ISO 13485.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="flex justify-center">
+                <div className="rounded-lg bg-primary/10 p-3">
+                  <Truck className="h-8 w-8 text-primary" />
+                </div>
+              </div>
+              <h3 className="mt-4 text-xl font-semibold text-gray-900">
+                Livraison Rapide
+              </h3>
+              <p className="mt-2 text-gray-600">
+                Livraison express en 24-48h partout en France métropolitaine.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="flex justify-center">
+                <div className="rounded-lg bg-primary/10 p-3">
+                  <HeadphonesIcon className="h-8 w-8 text-primary" />
+                </div>
+              </div>
+              <h3 className="mt-4 text-xl font-semibold text-gray-900">
+                Support Expert
+              </h3>
+              <p className="mt-2 text-gray-600">
+                Une équipe d'experts à votre disposition pour vous conseiller et vous accompagner.
+              </p>
+            </div>
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* Categories Preview */}
+      <section className="py-16 bg-gray-50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-heading font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Nos Catégories
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Explorez notre gamme complète d'équipements médicaux
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse">
+                  <div className="w-12 h-12 bg-gray-200 rounded-lg mb-4"></div>
+                  <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {categories.map((category, index) => (
+                <motion.div
+                  key={category.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Link href={`/categories/${category.slug}`}>
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-200 group">
+                      <div className="flex items-center mb-4">
+                        <div className="rounded-lg bg-primary/10 p-3 group-hover:bg-primary/20 transition-colors">
+                          <Package className="h-8 w-8 text-primary" />
+                        </div>
+                        <div className="ml-4 flex-1">
+                          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                            {category.name}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            {category.productCount} produits
+                          </p>
+                        </div>
+                      </div>
+                      {category.description && (
+                        <p className="text-gray-600 text-sm">
+                          {category.description}
+                        </p>
+                      )}
+                      <div className="mt-4 flex items-center text-primary font-medium text-sm group-hover:underline">
+                        Découvrir
+                        <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-12 text-center">
+            <Link
+              href="/categories"
+              className="btn-secondary inline-flex items-center gap-2"
+            >
+              Voir toutes les catégories
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Products */}
+      <section className="py-16 bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-heading font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Produits Vedettes
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Découvrez nos équipements les plus populaires
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="bg-gray-100 rounded-lg h-96 animate-pulse"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {featuredProducts.slice(0, 4).map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <ProductCard product={product} />
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-12 text-center">
+            <Link
+              href="/products"
+              className="btn-primary inline-flex items-center gap-2"
+            >
+              Voir tous les produits
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-secondary py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-heading font-bold tracking-tight text-white sm:text-4xl">
+              Prêt à équiper votre cabinet médical ?
+            </h2>
+            <p className="mt-4 text-lg text-gray-300">
+              Contactez-nous pour un devis personnalisé ou parcourez notre catalogue complet.
+            </p>
+            <div className="mt-8 flex items-center justify-center gap-x-6">
+              <Link
+                href="/contact"
+                className="rounded-lg bg-primary px-6 py-3 text-base font-semibold text-white hover:bg-primary-hover transition-colors duration-200"
+              >
+                Demander un devis
+              </Link>
+              <Link
+                href="/products"
+                className="text-base font-semibold leading-6 text-white hover:text-primary-light transition-colors"
+              >
+                Voir tous les produits <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
