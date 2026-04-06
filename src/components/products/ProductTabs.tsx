@@ -61,6 +61,30 @@ export default function ProductTabs({ product }: ProductTabsProps) {
       case 'specifications':
         return (
           <div className="space-y-6">
+            {/* Informations produit */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="text-lg font-medium text-gray-900 mb-4">
+                Informations produit
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <span className="text-sm font-medium text-gray-600">Référence</span>
+                  <p className="product-reference text-gray-900 font-mono">ALT-{product.id.slice(-6).toUpperCase()}</p>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-600">ID Produit</span>
+                  <p className="product-code text-gray-900 font-mono">{product.id}</p>
+                </div>
+                {product.brand && (
+                  <div>
+                    <span className="text-sm font-medium text-gray-600">Marque</span>
+                    <p className="text-gray-900">{product.brand}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Spécifications techniques */}
             {product.specifications ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {Object.entries(product.specifications).map(([key, value]) => (
@@ -185,20 +209,60 @@ export default function ProductTabs({ product }: ProductTabsProps) {
               <div className="border border-gray-200 rounded-lg p-6">
                 <h5 className="font-medium text-gray-900 mb-3">Ce qui est inclus</h5>
                 <ul className="space-y-2 text-gray-700 text-sm">
-                  <li>✓ Défauts de matériaux</li>
-                  <li>✓ Vices de fabrication</li>
-                  <li>✓ Dysfonctionnements électroniques</li>
-                  <li>✓ Support technique</li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Défauts de matériaux
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Vices de fabrication
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Dysfonctionnements électroniques
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Support technique
+                  </li>
                 </ul>
               </div>
 
               <div className="border border-gray-200 rounded-lg p-6">
                 <h5 className="font-medium text-gray-900 mb-3">Exclusions</h5>
                 <ul className="space-y-2 text-gray-700 text-sm">
-                  <li>✗ Dommages accidentels</li>
-                  <li>✗ Usure normale</li>
-                  <li>✗ Mauvaise utilisation</li>
-                  <li>✗ Modifications non autorisées</li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                    Dommages accidentels
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                    Usure normale
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                    Mauvaise utilisation
+                  </li>
+                  <li className="flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                    Modifications non autorisées
+                  </li>
                 </ul>
               </div>
             </div>

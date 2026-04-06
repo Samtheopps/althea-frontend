@@ -1,5 +1,5 @@
 /* Import Google Fonts - MUST be first */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @import "tailwindcss";
 
@@ -51,6 +51,26 @@ body {
   font-family: Inter, system-ui, sans-serif;
 }
 
+/* Custom animations */
+@keyframes slide-in-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: slide-in-from-top 0.2s ease-out;
+}
+
+.slide-in-from-top-2 {
+  animation: slide-in-from-top 0.2s ease-out;
+}
+
 /* Utility classes */
 .btn-primary {
   background-color: var(--color-primary);
@@ -78,9 +98,255 @@ body {
   background-color: var(--color-secondary-hover);
 }
 
+/* LOGO STYLES - Improved visibility and fallback support */
 .text-gradient {
-  background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  /* Fallback pour navigateurs non compatibles */
+  color: var(--color-primary);
+  /* Position pour éviter les problèmes de clipping */
+  position: relative;
+  display: inline-block;
+}
+
+/* Fallback pour navigateurs qui ne supportent pas background-clip: text */
+@supports not (-webkit-background-clip: text) {
+  .text-gradient {
+    color: var(--color-primary);
+    -webkit-text-fill-color: unset;
+  }
+}
+
+/* Logo avec meilleur contraste sur fond sombre */
+.text-gradient-inverse {
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-primary-light) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #ffffff;
+}
+
+@supports not (-webkit-background-clip: text) {
+  .text-gradient-inverse {
+    color: #ffffff;
+    -webkit-text-fill-color: unset;
+  }
+}
+
+/* Logo adaptatif selon le contexte */
+.logo-adaptive {
+  transition: all 0.3s ease;
+}
+
+.logo-adaptive:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+/* Ensures good contrast for all text elements */
+.text-contrast-high {
+  color: #1f2937 !important; /* gray-800 */
+}
+
+.text-contrast-medium {
+  color: #4b5563 !important; /* gray-600 */
+}
+
+/* Force input text to be visible - Safety net for all inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+textarea {
+  color: #1f2937 !important; /* gray-800 */
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af !important; /* gray-400 */
+}
+
+/* Helps debug layout issues - can be removed in production */
+.debug-layout {
+  outline: 1px solid red !important;
+}
+
+/* Fixes for product cards uniform height */
+.product-card-grid {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* Utility for line clamping with fallback */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.5;
+  max-height: 3em; /* fallback for non-webkit browsers */
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-height: 1.5;
+  max-height: 4.5em; /* fallback for non-webkit browsers */
+}
+
+/* Additional logo visibility fixes */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Ensure logo is always visible in print */
+@media print {
+  .text-gradient,
+  .text-gradient-inverse {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    background: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .text-gradient {
+    color: var(--color-secondary) !important;
+    -webkit-text-fill-color: var(--color-secondary) !important;
+    background: none !important;
+  }
+}
+
+/* === CORRECTION ZONES DE SÉLECTION === */
+/* Sélection globale avec couleurs Althea Systems */
+*::selection {
+  background-color: rgba(0, 168, 181, 0.2); /* primary/20 */
+  color: #00a8b5; /* primary */
+}
+
+*::-moz-selection {
+  background-color: rgba(0, 168, 181, 0.2); /* primary/20 */
+  color: #00a8b5; /* primary */
+}
+
+/* Sélection spécifique pour les inputs et textarea */
+input::selection,
+input::-moz-selection,
+textarea::selection,
+textarea::-moz-selection {
+  background-color: rgba(0, 168, 181, 0.2); /* primary/20 */
+  color: #00a8b5; /* primary */
+}
+
+/* Sélection sur fond coloré (adaptation intelligente) */
+.bg-primary ::selection,
+.bg-primary *::selection {
+  background-color: rgba(255, 255, 255, 0.3); /* white/30 */
+  color: white;
+}
+
+.bg-primary ::-moz-selection,
+.bg-primary *::-moz-selection {
+  background-color: rgba(255, 255, 255, 0.3); /* white/30 */
+  color: white;
+}
+
+/* === CORRECTION VISIBILITÉ NUMÉROS DE PRODUIT === */
+/* Classes utilitaires pour les numéros de produit */
+.product-reference {
+  color: #4b5563 !important; /* gray-600 */
+  font-weight: 500;
+}
+
+.product-sku {
+  color: #4b5563 !important; /* gray-600 */
+  font-weight: 500;
+}
+
+.product-code {
+  color: #6b7280 !important; /* gray-500 */
+  font-weight: 500;
+}
+
+/* Surcharge de sécurité pour éviter le texte blanc invisible */
+.product-info .text-white,
+.product-card .text-white {
+  color: #4b5563 !important; /* gray-600 au lieu de white */
+}
+
+/* Exception pour les badges et éléments qui doivent rester blancs */
+.badge .text-white,
+.bg-primary .text-white,
+.bg-secondary .text-white,
+.bg-green-500 .text-white,
+.bg-red-500 .text-white,
+.bg-blue-500 .text-white,
+button .text-white {
+  color: white !important; /* Garder blanc pour ces éléments */
+}
+
+/* === AMÉLIORATION CONTRASTE GÉNÉRAL === */
+/* Assurer un bon contraste pour tous les textes critiques */
+.text-product-reference {
+  color: #374151 !important; /* gray-700 */
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.text-product-sku {
+  color: #4b5563 !important; /* gray-600 */
+  font-weight: 500;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+.text-product-code {
+  color: #6b7280 !important; /* gray-500 */
+  font-weight: 500;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* Classes pour différents contextes */
+.on-white .product-reference {
+  color: #1f2937 !important; /* gray-800 sur fond blanc */
+}
+
+.on-gray .product-reference {
+  color: #111827 !important; /* gray-900 sur fond gris clair */
+}
+
+.on-dark .product-reference {
+  color: #f9fafb !important; /* gray-50 sur fond sombre */
+}
+
+/* === AMÉLIORATION DE LA SÉLECTION DANS LES TABLEAUX === */
+table ::selection,
+table *::selection {
+  background-color: rgba(0, 168, 181, 0.15); /* primary/15 pour les tableaux */
+  color: #00a8b5; /* primary */
+}
+
+table ::-moz-selection,
+table *::-moz-selection {
+  background-color: rgba(0, 168, 181, 0.15); /* primary/15 pour les tableaux */
+  color: #00a8b5; /* primary */
+}
+
+/* === MODE SOMBRE (si implémenté plus tard) === */
+@media (prefers-color-scheme: dark) {
+  *::selection {
+    background-color: rgba(0, 168, 181, 0.4); /* primary/40 en mode sombre */
+    color: #33bfc9; /* primary-hover */
+  }
+
+  *::-moz-selection {
+    background-color: rgba(0, 168, 181, 0.4); /* primary/40 en mode sombre */
+    color: #33bfc9; /* primary-hover */
+  }
 }

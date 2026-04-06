@@ -169,20 +169,59 @@ export default function ProductPage() {
             <ProductImageCarousel images={product.images || []} />
           </div>
 
-          {/* Informations produit */}
-          <div className="space-y-6">
-            {/* Header */}
-            <div>
-              {product.brand && (
-                <p className="text-sm text-gray-600 mb-2">{product.brand}</p>
-              )}
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                {product.name}
-              </h1>
-              <p className="text-gray-600 leading-relaxed">
-                {product.shortDescription || product.description}
-              </p>
-            </div>
+            {/* Informations produit */}
+            <div className="space-y-6">
+              {/* Header */}
+              <div>
+                {product.brand && (
+                  <p className="text-sm text-gray-700 mb-2 font-medium">{product.brand}</p>
+                )}
+                
+                {/* Référence produit */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="space-y-1">
+                    <p className="text-sm product-reference text-gray-600 font-mono">
+                      REF: ALT-{product.id.slice(-6).toUpperCase()}
+                    </p>
+                    {selectedVariant?.sku && (
+                      <p className="text-sm product-sku text-gray-500 font-mono">
+                        SKU: {selectedVariant.sku}
+                      </p>
+                    )}
+                  </div>
+                  {product.stock !== undefined && (
+                    <div className="text-right">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                        product.stock > 10 
+                          ? 'bg-green-100 text-green-800'
+                          : product.stock > 0 
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                      }`}>
+                        {product.stock > 10 ? (
+                          <>
+                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            En stock ({product.stock})
+                          </>
+                        ) : product.stock > 0 ? (
+                          <>Stock limité ({product.stock})</>
+                        ) : (
+                          <>Rupture de stock</>
+                        )}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                  {product.name}
+                </h1>
+                <p className="text-gray-700 leading-relaxed">
+                  {product.shortDescription || product.description}
+                </p>
+              </div>
 
             {/* Prix */}
             <div className="bg-gray-50 rounded-lg p-6">
@@ -226,6 +265,11 @@ export default function ProductPage() {
                       <div className="text-sm text-gray-600">
                         {formatPrice(variant.price)}
                       </div>
+                      {variant.sku && (
+                        <div className="text-xs product-sku text-gray-500 font-mono mt-1">
+                          SKU: {variant.sku}
+                        </div>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -315,21 +359,6 @@ export default function ProductPage() {
                 </div>
               </div>
             </div>
-
-            {/* Stock */}
-            {product.stock !== undefined && (
-              <div className="text-sm">
-                {product.stock > 10 ? (
-                  <span className="text-green-600 font-medium">✓ En stock</span>
-                ) : product.stock > 0 ? (
-                  <span className="text-orange-600 font-medium">
-                    ⚠ Plus que {product.stock} en stock
-                  </span>
-                ) : (
-                  <span className="text-red-600 font-medium">✗ Rupture de stock</span>
-                )}
-              </div>
-            )}
           </div>
         </div>
 
@@ -339,17 +368,21 @@ export default function ProductPage() {
         </div>
 
         {/* Avis clients */}
-        <div className="mt-16">
-          <ProductReviews productId={product.id} />
-        </div>
+        {product?.id && (
+          <div className="mt-16">
+            <ProductReviews productId={product.id} />
+          </div>
+        )}
 
         {/* Produits similaires */}
-        <div className="mt-16">
-          <ProductSimilar 
-            productId={product.id} 
-            categoryId={product.categoryId} 
-          />
-        </div>
+        {product?.id && (
+          <div className="mt-16">
+            <ProductSimilar 
+              productId={product.id} 
+              categoryId={product.categoryId} 
+            />
+          </div>
+        )}
       </div>
     </div>
   );
