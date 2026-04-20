@@ -1,0 +1,460 @@
+/* ============================================================
+   ALTHEA SYSTEMS — Design System
+   Poppins (headings) + Inter (body)
+   Primary: #00a8b5 | Secondary: #003d5c
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap');
+@import "tailwindcss";
+
+/* ============================================================
+   CSS VARIABLES
+   ============================================================ */
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #f8fafc;
+  --bg-muted: #f1f5f9;
+
+  --primary:       #00a8b5;
+  --primary-hover: #0098a4;
+  --primary-light: #e0f7f9;
+  --primary-dark:  #007a85;
+
+  --secondary:       #003d5c;
+  --secondary-hover: #004d74;
+  --secondary-light: #e8f2f8;
+
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / .08), 0 1px 2px -1px rgb(0 0 0 / .06);
+  --shadow:    0 4px 6px -1px rgb(0 0 0 / .08), 0 2px 4px -2px rgb(0 0 0 / .06);
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / .08), 0 4px 6px -4px rgb(0 0 0 / .06);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / .08), 0 8px 10px -6px rgb(0 0 0 / .06);
+
+  --radius-sm: 0.375rem;
+  --radius:    0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================
+   THEME TOKENS (Tailwind v4)
+   ============================================================ */
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: #0f172a;
+  --font-sans:    Inter, system-ui, sans-serif;
+  --font-heading: Poppins, sans-serif;
+
+  /* Expose Althea palette as Tailwind utilities (bg-primary, text-primary, etc.) */
+  --color-primary:          #00a8b5;
+  --color-primary-hover:    #0098a4;
+  --color-primary-light:    #e0f7f9;
+  --color-primary-dark:     #007a85;
+  --color-secondary:        #003d5c;
+  --color-secondary-hover:  #004d74;
+  --color-secondary-light:  #e8f2f8;
+
+  --color-status-in:        #10b981;
+  --color-status-low:       #f59e0b;
+  --color-status-out:       #ef4444;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  color: #0f172a;
+  font-family: Inter, system-ui, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar        { width: 5px; }
+::-webkit-scrollbar-track  { background: var(--bg-muted); }
+::-webkit-scrollbar-thumb  { background: var(--primary); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-hover); }
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   COMPONENT CLASSES
+   Wrapped in @layer components so Tailwind utilities (pl-*, pr-*, etc.)
+   can override padding/spacing defined here.
+   ============================================================ */
+@layer components {
+
+/* ── Typography ── */
+.text-gradient {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: Inter, system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  line-height: 1;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Primary */
+.btn-primary {
+  background-color: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+  box-shadow: 0 1px 2px 0 rgb(0 168 181 / .2);
+}
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+  box-shadow: 0 4px 12px 0 rgb(0 168 181 / .3);
+  transform: translateY(-1px);
+}
+.btn-primary:active { transform: translateY(0); }
+
+/* Secondary (navy) */
+.btn-secondary {
+  background-color: var(--secondary);
+  color: #ffffff;
+  border-color: var(--secondary);
+}
+.btn-secondary:hover {
+  background-color: var(--secondary-hover);
+  border-color: var(--secondary-hover);
+  transform: translateY(-1px);
+}
+
+/* Outline */
+.btn-outline {
+  background-color: transparent;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.btn-outline:hover {
+  background-color: var(--primary-light);
+  transform: translateY(-1px);
+}
+
+/* Ghost */
+.btn-ghost {
+  background-color: transparent;
+  color: #475569;
+  border-color: transparent;
+}
+.btn-ghost:hover {
+  background-color: var(--bg-muted);
+  color: #0f172a;
+}
+
+/* Sizes */
+.btn-sm { padding: 0.5rem 1rem; font-size: 0.875rem; }
+.btn-lg { padding: 1rem 2rem; font-size: 1rem; }
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card-elevated {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+.card-elevated:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* Legacy alias — same rules as .card, no @apply */
+.card-elegant {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+.card-elegant:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================================
+   BADGES / STATUS
+   ============================================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.25rem 0.625rem;
+  border-radius: 99px;
+}
+.badge-primary { background: var(--primary-light); color: var(--primary-dark); }
+.badge-success { background: #dcfce7; color: #166534; }
+.badge-warning { background: #fef3c7; color: #92400e; }
+.badge-danger  { background: #fee2e2; color: #991b1b; }
+.badge-navy    { background: var(--secondary-light); color: var(--secondary); }
+
+/* Stock indicators — inline (no @apply on custom classes in Tailwind v4) */
+.stock-in {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  font-size: 0.75rem; font-weight: 600; line-height: 1;
+  padding: 0.25rem 0.625rem; border-radius: 99px;
+  background: #dcfce7; color: #166534;
+}
+.stock-low {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  font-size: 0.75rem; font-weight: 600; line-height: 1;
+  padding: 0.25rem 0.625rem; border-radius: 99px;
+  background: #fef3c7; color: #92400e;
+}
+.stock-out {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  font-size: 0.75rem; font-weight: 600; line-height: 1;
+  padding: 0.25rem 0.625rem; border-radius: 99px;
+  background: #fee2e2; color: #991b1b;
+}
+
+/* ============================================================
+   FORMS
+   ============================================================ */
+.input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.9375rem;
+  color: #0f172a;
+  background: #ffffff;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+}
+.input::placeholder { color: #94a3b8; }
+.input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgb(0 168 181 / .12);
+}
+.input:hover:not(:focus) { border-color: #94a3b8; }
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.375rem;
+}
+
+/* ============================================================
+   SECTION BACKGROUNDS
+   ============================================================ */
+.section-white  { background: #ffffff; }
+.section-subtle { background: var(--bg-subtle); }
+.section-muted  { background: var(--bg-muted); }
+.section-navy   { background: var(--secondary); color: #ffffff; }
+.section-teal   { background: var(--primary); color: #ffffff; }
+
+.section-hero {
+  background: linear-gradient(135deg, var(--secondary) 0%, #005580 50%, #006670 100%);
+  color: #ffffff;
+}
+
+} /* end @layer components */
+
+/* ============================================================
+   ANIMATIONS — keyframes must stay outside layers
+   ============================================================ */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgb(0 168 181 / .4); }
+  70%  { box-shadow: 0 0 0 12px rgb(0 168 181 / 0); }
+  100% { box-shadow: 0 0 0 0 rgb(0 168 181 / 0); }
+}
+
+@layer components {
+.animate-fade-up    { animation: fade-up 0.5s ease forwards; }
+.animate-fade-in    { animation: fade-in 0.4s ease forwards; }
+.animate-slide-down { animation: slide-down 0.25s ease forwards; }
+
+/* Stagger delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+
+/* Legacy */
+.animate-in            { animation: slide-down 0.2s ease forwards; }
+.slide-in-from-top-2   { animation: slide-down 0.2s ease forwards; }
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+.hover-lift {
+  transition: transform var(--transition);
+}
+.hover-lift:hover { transform: translateY(-2px); }
+
+.container-page {
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+@media (min-width: 640px)  { .container-page { padding-inline: 1.5rem; } }
+@media (min-width: 1024px) { .container-page { padding-inline: 2rem; } }
+
+/* Section spacing */
+.section { padding-block: 5rem; }
+.section-sm { padding-block: 3rem; }
+
+/* Divider */
+.divider { border-top: 1px solid var(--border); }
+
+/* ============================================================
+   PRODUCT SPECIFIC
+   ============================================================ */
+.product-reference {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+/* ============================================================
+   LEGACY GRADIENTS (kept for backwards compat)
+   ============================================================ */
+.bg-gradient-elegant {
+  background: linear-gradient(135deg, #f8fafc 0%, var(--secondary-light) 50%, var(--primary-light) 100%);
+}
+.bg-gradient-soft {
+  background: var(--bg-subtle);
+}
+.bg-gradient-premium {
+  background: linear-gradient(135deg, var(--secondary) 0%, #005580 100%);
+}
+
+/* ============================================================
+   ACCESSIBILITY — WCAG 2.1
+   ============================================================ */
+
+/* 1. Screen-reader only utility */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* 2. Enhanced focus ring for interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2.5px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* 3. High-contrast mode support */
+@media (forced-colors: active) {
+  .btn-primary,
+  .btn-secondary {
+    forced-color-adjust: none;
+    border: 2px solid ButtonText;
+  }
+  :focus-visible {
+    outline: 3px solid Highlight;
+  }
+}
+
+/* 4. Reduced motion — honour user OS preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 5. Minimum touch target size (WCAG 2.5.5) */
+button, [role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+/* Exception for tight UI chips / badges */
+.badge, .chip { min-height: unset; min-width: unset; }
+
+} /* end @layer components */
