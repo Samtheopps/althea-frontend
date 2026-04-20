@@ -1,0 +1,61 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="#f8fafc"/>
+  
+  <!-- Gradient overlay -->
+  <rect width="400" height="300" fill="url(#instrumentsGradient)" opacity="0.1"/>
+  
+  <!-- Define gradients -->
+  <defs>
+    <linearGradient id="instrumentsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#003d5c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00a8b5;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Surgical instruments -->
+  <!-- Scalpel -->
+  <rect x="120" y="80" width="4" height="50" fill="#003d5c"/>
+  <path d="M122 80 L130 70 L130 60 L122 55" fill="#6b7280"/>
+  
+  <!-- Forceps -->
+  <path d="M160 80 Q170 70, 180 80 Q170 90, 160 80" fill="none" stroke="#00a8b5" stroke-width="3"/>
+  <path d="M160 100 Q170 110, 180 100 Q170 90, 160 100" fill="none" stroke="#00a8b5" stroke-width="3"/>
+  <line x1="170" y1="80" x2="170" y2="100" stroke="#00a8b5" stroke-width="2"/>
+  
+  <!-- Scissors -->
+  <ellipse cx="240" cy="90" rx="12" ry="8" fill="none" stroke="#003d5c" stroke-width="3"/>
+  <ellipse cx="240" cy="110" rx="12" ry="8" fill="none" stroke="#003d5c" stroke-width="3"/>
+  <line x1="252" y1="90" x2="252" y2="110" stroke="#003d5c" stroke-width="2"/>
+  
+  <!-- Syringe -->
+  <rect x="280" y="95" width="40" height="6" rx="3" fill="#6b7280"/>
+  <rect x="275" y="93" width="8" height="10" rx="2" fill="#00a8b5"/>
+  <circle cx="325" cy="98" r="3" fill="#003d5c"/>
+  
+  <!-- Decorative elements -->
+  <circle cx="100" cy="150" r="5" fill="#00a8b5" opacity="0.4"/>
+  <circle cx="320" cy="60" r="7" fill="#003d5c" opacity="0.3"/>
+  <rect x="80" y="180" width="10" height="10" rx="2" fill="#00a8b5" opacity="0.2"/>
+  
+  <!-- Title area -->
+  <rect x="50" y="180" width="300" height="80" rx="10" fill="rgba(255,255,255,0.9)"/>
+  
+  <!-- Title -->
+  <text x="200" y="205" text-anchor="middle" fill="#003d5c" font-family="Arial, sans-serif" font-size="20" font-weight="bold">
+    INSTRUMENTS
+  </text>
+  <text x="200" y="225" text-anchor="middle" fill="#003d5c" font-family="Arial, sans-serif" font-size="20" font-weight="bold">
+    CHIRURGICAUX
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="245" text-anchor="middle" fill="#6b7280" font-family="Arial, sans-serif" font-size="14">
+    Instruments pour bloc opératoire
+  </text>
+  
+  <!-- Brand -->
+  <text x="200" y="20" text-anchor="middle" fill="#003d5c" font-family="Arial, sans-serif" font-size="12" font-weight="bold">
+    ALTHEA SYSTEMS
+  </text>
+</svg>

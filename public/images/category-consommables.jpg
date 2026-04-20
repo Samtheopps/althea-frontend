@@ -1,0 +1,75 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="#f8fafc"/>
+  
+  <!-- Gradient overlay -->
+  <rect width="400" height="300" fill="url(#consommablesGradient)" opacity="0.1"/>
+  
+  <!-- Define gradients -->
+  <defs>
+    <linearGradient id="consommablesGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00a8b5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#003d5c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Medical consumables -->
+  <!-- Gloves box -->
+  <rect x="80" y="80" width="60" height="40" rx="5" fill="#003d5c"/>
+  <rect x="85" y="85" width="50" height="30" rx="3" fill="#00a8b5" opacity="0.8"/>
+  <text x="110" y="105" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="8" font-weight="bold">
+    GANTS
+  </text>
+  
+  <!-- Masks -->
+  <ellipse cx="180" cy="90" rx="25" ry="12" fill="#e5e7eb"/>
+  <ellipse cx="180" cy="90" rx="20" ry="8" fill="none" stroke="#003d5c" stroke-width="2"/>
+  <line x1="165" y1="85" x2="165" y2="95" stroke="#00a8b5" stroke-width="2"/>
+  <line x1="195" y1="85" x2="195" y2="95" stroke="#00a8b5" stroke-width="2"/>
+  
+  <!-- Syringes -->
+  <rect x="240" y="75" width="30" height="4" rx="2" fill="#6b7280"/>
+  <rect x="235" y="73" width="8" height="8" rx="2" fill="#00a8b5"/>
+  <circle cx="275" cy="77" r="2" fill="#003d5c"/>
+  
+  <rect x="240" y="90" width="30" height="4" rx="2" fill="#6b7280"/>
+  <rect x="235" y="88" width="8" height="8" rx="2" fill="#00a8b5"/>
+  <circle cx="275" cy="92" r="2" fill="#003d5c"/>
+  
+  <rect x="240" y="105" width="30" height="4" rx="2" fill="#6b7280"/>
+  <rect x="235" y="103" width="8" height="8" rx="2" fill="#00a8b5"/>
+  <circle cx="275" cy="107" r="2" fill="#003d5c"/>
+  
+  <!-- Bandages roll -->
+  <circle cx="320" cy="100" r="20" fill="#e5e7eb"/>
+  <circle cx="320" cy="100" r="15" fill="#ffffff"/>
+  <circle cx="320" cy="100" r="10" fill="#6b7280"/>
+  
+  <!-- Pills/medicine -->
+  <ellipse cx="120" cy="140" rx="8" ry="6" fill="#dc2626"/>
+  <ellipse cx="140" cy="135" rx="6" ry="4" fill="#16a34a"/>
+  <ellipse cx="130" cy="150" rx="7" ry="5" fill="#2563eb"/>
+  
+  <!-- Decorative elements -->
+  <rect x="300" y="140" width="4" height="4" rx="1" fill="#00a8b5" opacity="0.4"/>
+  <circle cx="90" cy="160" r="3" fill="#003d5c" opacity="0.3"/>
+  <circle cx="350" cy="70" r="5" fill="#00a8b5" opacity="0.2"/>
+  
+  <!-- Title area -->
+  <rect x="50" y="180" width="300" height="80" rx="10" fill="rgba(255,255,255,0.9)"/>
+  
+  <!-- Title -->
+  <text x="200" y="210" text-anchor="middle" fill="#003d5c" font-family="Arial, sans-serif" font-size="24" font-weight="bold">
+    CONSOMMABLES
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="235" text-anchor="middle" fill="#6b7280" font-family="Arial, sans-serif" font-size="14">
+    Gants, masques, seringues
+  </text>
+  
+  <!-- Brand -->
+  <text x="200" y="20" text-anchor="middle" fill="#003d5c" font-family="Arial, sans-serif" font-size="12" font-weight="bold">
+    ALTHEA SYSTEMS
+  </text>
+</svg>
