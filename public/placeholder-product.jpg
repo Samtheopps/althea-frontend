@@ -1,0 +1,33 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="400" fill="#f8fafc"/>
+  
+  <!-- Main Container -->
+  <rect x="80" y="80" width="240" height="240" rx="20" fill="#e5e7eb"/>
+  <rect x="90" y="90" width="220" height="220" rx="15" fill="#f9fafb"/>
+  
+  <!-- Medical Cross -->
+  <rect x="190" y="140" width="20" height="120" rx="10" fill="#00a8b5"/>
+  <rect x="140" y="190" width="120" height="20" rx="10" fill="#00a8b5"/>
+  
+  <!-- Decorative Elements -->
+  <circle cx="150" cy="150" r="8" fill="#003d5c" opacity="0.3"/>
+  <circle cx="250" cy="150" r="8" fill="#003d5c" opacity="0.3"/>
+  <circle cx="150" cy="250" r="8" fill="#003d5c" opacity="0.3"/>
+  <circle cx="250" cy="250" r="8" fill="#003d5c" opacity="0.3"/>
+  
+  <!-- Brand Label -->
+  <text x="200" y="50" text-anchor="middle" fill="#003d5c" font-family="Arial, sans-serif" font-size="16" font-weight="bold">
+    ALTHEA SYSTEMS
+  </text>
+  
+  <!-- Product Label -->
+  <text x="200" y="360" text-anchor="middle" fill="#6b7280" font-family="Arial, sans-serif" font-size="14">
+    Équipement Médical
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="380" text-anchor="middle" fill="#9ca3af" font-family="Arial, sans-serif" font-size="12">
+    Image de placeholder
+  </text>
+</svg>

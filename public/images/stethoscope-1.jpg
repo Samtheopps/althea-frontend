@@ -1,0 +1,43 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="400" fill="#f8fafc"/>
+  
+  <!-- Chest Piece (Diaphragm) -->
+  <circle cx="200" cy="280" r="45" fill="#374151"/>
+  <circle cx="200" cy="280" r="35" fill="#00a8b5"/>
+  <circle cx="200" cy="280" r="25" fill="#003d5c"/>
+  
+  <!-- Tubing -->
+  <path d="M200 235 Q150 180, 120 120 Q110 100, 120 80" stroke="#374151" stroke-width="8" fill="none"/>
+  <path d="M200 235 Q250 180, 280 120 Q290 100, 280 80" stroke="#374151" stroke-width="8" fill="none"/>
+  
+  <!-- Earpieces -->
+  <ellipse cx="120" cy="80" rx="12" ry="8" fill="#003d5c"/>
+  <ellipse cx="280" cy="80" rx="12" ry="8" fill="#003d5c"/>
+  
+  <!-- Ear Tips -->
+  <ellipse cx="120" cy="75" rx="8" ry="5" fill="#00a8b5"/>
+  <ellipse cx="280" cy="75" rx="8" ry="5" fill="#00a8b5"/>
+  
+  <!-- Tension Springs -->
+  <rect x="115" y="85" width="10" height="15" rx="2" fill="#6b7280"/>
+  <rect x="275" y="85" width="10" height="15" rx="2" fill="#6b7280"/>
+  
+  <!-- Chest Piece Details -->
+  <circle cx="200" cy="280" r="15" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.5"/>
+  
+  <!-- Brand Logo on Chest Piece -->
+  <text x="200" y="285" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="8" font-weight="bold">
+    AS
+  </text>
+  
+  <!-- Brand Label -->
+  <text x="200" y="50" text-anchor="middle" fill="#003d5c" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
+    ALTHEA SYSTEMS
+  </text>
+  
+  <!-- Product Label -->
+  <text x="200" y="370" text-anchor="middle" fill="#6b7280" font-family="Arial, sans-serif" font-size="12">
+    Stéthoscope Professionnel
+  </text>
+</svg>
