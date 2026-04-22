@@ -1,38 +1,14 @@
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
 
-// Configuration Stripe
-export const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-);
+let stripePromise: Promise<Stripe | null> | null = null;
 
-// Types pour Stripe
-export interface PaymentIntent {
-  id: string;
-  amount: number;
-  currency: string;
-  status: string;
-  client_secret: string;
-}
-
-export interface CheckoutSession {
-  id: string;
-  url: string;
-  payment_status: string;
-}
-
-// Configuration des produits Stripe
-export const createCheckoutSession = async (items: any[]) => {
-  const response = await fetch('/api/checkout', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ items }),
-  });
-
-  if (!response.ok) {
-    throw new Error('Erreur lors de la création de la session de paiement');
+/**
+ * Singleton Stripe.js loader.
+ * Returns a memoized promise that resolves with the Stripe instance.
+ */
+export function getStripe(): Promise<Stripe | null> {
+  if (!stripePromise) {
+    stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
   }
-
-  return response.json();
-};
+  return stripePromise;
+}

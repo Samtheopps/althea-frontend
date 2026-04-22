@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,7 +22,6 @@ export default function CartPage() {
     getTotalItems,
     getTotalPrice,
     isHydrated,
-    setHydrated,
   } = useCartStore();
   const { isAuthenticated } = useAuthStore();
 
@@ -32,11 +31,6 @@ export default function CartPage() {
 
   const [promoCode, setPromoCode] = useState('');
   const [discount, setDiscount] = useState(0);
-
-  // Gérer l'hydratation côté client
-  useEffect(() => {
-    setHydrated(true);
-  }, [setHydrated]);
 
   // Éviter les calculs avant l'hydratation
   if (!isHydrated) {
@@ -52,9 +46,13 @@ export default function CartPage() {
     );
   }
 
-  const totalHT = getTotalPrice() - discount;
-  const totalTVA = totalHT * 0.2;
-  const totalTTC = totalHT + totalTVA;
+  // Les prix des produits sont TTC (product.price = product.priceTtc côté backend).
+  // On décompose pour afficher HT / TVA / TTC sans double TVA.
+  const VAT_RATE = 0.2;
+  const cartTotalTTC = getTotalPrice() - discount;
+  const totalHT = cartTotalTTC / (1 + VAT_RATE);
+  const totalTVA = cartTotalTTC - totalHT;
+  const totalTTC = cartTotalTTC;
 
   const handleApplyPromo = () => {
     // Simulation d'application de code promo
@@ -326,8 +324,8 @@ export default function CartPage() {
               {/* Détails */}
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-black">
-                  <span>Sous-total ({getTotalItems()} article{getTotalItems() > 1 ? 's' : ''})</span>
-                  <span>{formatPrice(getTotalPrice())}</span>
+                  <span>Sous-total HT ({getTotalItems()} article{getTotalItems() > 1 ? 's' : ''})</span>
+                  <span>{formatPrice(totalHT)}</span>
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-green-600">
@@ -351,7 +349,7 @@ export default function CartPage() {
               <div className="mb-6">
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                   <p className="text-sm text-green-800">
-                    {totalHT >= 100 ? (
+                    {totalTTC >= 100 ? (
                       <span className="flex items-center">
                         <svg className="w-4 h-4 mr-1 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -360,7 +358,7 @@ export default function CartPage() {
                       </span>
                     ) : (
                       <span>
-                        Ajoutez {formatPrice(100 - totalHT)} pour la livraison gratuite
+                        Ajoutez {formatPrice(100 - totalTTC)} pour la livraison gratuite
                       </span>
                     )}
                   </p>

@@ -40,8 +40,8 @@ export function transformApiProduct(apiData: any): Product {
   const originalPrice = apiProduct.originalPrice ? parseFloat(apiProduct.originalPrice) : undefined;
 
   // Transformer les images en URLs (pour compatibilité)
-  const images = productImages?.map((img: any) => 
-    `https://api-pslt.matheovieilleville.fr/uploads/${img.imageRef}`
+  const images = productImages?.map((img: any) =>
+    `https://api-pslt.matheovieilleville.fr/api/v1/media/${img.imageRef}`
   ) || [];
   
   // Garder aussi les images brutes pour les besoins avancés
@@ -83,8 +83,8 @@ export function transformApiCategory(apiCategory: any): Category {
   }
 
   // Construire l'URL de l'image si elle existe
-  const image = apiCategory.imageRef 
-    ? `https://api-pslt.matheovieilleville.fr/uploads/${apiCategory.imageRef}`
+  const image = apiCategory.imageRef
+    ? `https://api-pslt.matheovieilleville.fr/api/v1/media/${apiCategory.imageRef}`
     : undefined;
 
   return {
@@ -113,5 +113,5 @@ export function transformProductsResponse(apiResponse: any) {
  */
 export function getImageUrl(imageRef?: string | null): string | undefined {
   if (!imageRef) return undefined;
-  return `https://api-pslt.matheovieilleville.fr/uploads/${imageRef}`;
+  return `https://api-pslt.matheovieilleville.fr/api/v1/media/${imageRef}`;
 }
