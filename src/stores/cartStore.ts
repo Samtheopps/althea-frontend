@@ -114,6 +114,19 @@ export const useCartStore = create<CartState>()(
     {
       name: 'cart-storage',
       partialize: (state) => ({ items: state.items }),
+      // Active isHydrated une fois que le rehydrate depuis localStorage est TERMINÉ,
+      // sinon les composants peuvent render avec items=[] juste avant la rehydration,
+      // ce qui redirige à tort vers /cart ("panier vide").
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error('[cartStore] rehydrate error:', error);
+        }
+        // Le state après merge contient les actions → setHydrated est disponible.
+        // On diffère quand même en microtask pour sortir du cycle de création du store.
+        if (state) {
+          queueMicrotask(() => state.setHydrated(true));
+        }
+      },
     }
   )
 );

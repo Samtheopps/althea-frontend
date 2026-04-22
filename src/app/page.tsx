@@ -8,10 +8,18 @@ import { ArrowRight, ShieldCheck, Truck, HeadphonesIcon, Award } from 'lucide-re
 import type { Category, Product } from '@/types/api';
 import { categoryService } from '@/services/categoryService';
 import { productService } from '@/services/productService';
+import { homepageService } from '@/services/homepageService';
 import ProductCard from '@/components/products/ProductCard';
 import { ProductCardSkeleton } from '@/components/ui/LoadingSpinner';
-import HeroCarousel from '@/components/home/HeroCarousel';
+import HeroCarousel, { type CarouselSlide } from '@/components/home/HeroCarousel';
 import { useI18n } from '@/lib/i18n';
+
+/* Visual presets cycled across API-driven slides (gradient + accent not stored server-side) */
+const CAROUSEL_PRESETS = [
+  { gradient: 'linear-gradient(135deg, #002740 0%, #003d5c 45%, #005580 100%)', accentColor: '#33bfc9' },
+  { gradient: 'linear-gradient(135deg, #003d5c 0%, #005580 50%, #007a85 100%)', accentColor: '#00a8b5' },
+  { gradient: 'linear-gradient(135deg, #001a2e 0%, #002740 45%, #003d5c 100%)', accentColor: '#33bfc9' },
+] as const;
 
 /* ── Animation variants ── */
 const fadeUp = {
@@ -30,21 +38,53 @@ export default function HomePage() {
   const TRUST_ITEMS = tr.home.trust.map((t, i) => ({ ...t, icon: TRUST_ICONS[i] }));
   const [categories,       setCategories]       = useState<Category[]>([]);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [carouselSlides,   setCarouselSlides]   = useState<CarouselSlide[]>([]);
   const [loading,          setLoading]          = useState(true);
+
+  // Mobile first : sur mobile on affiche les produits en liste, pas en card
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)');
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   useEffect(() => {
     (async () => {
       try {
-        const [cats, prods] = await Promise.allSettled([
+        const [cats, prods, slides] = await Promise.allSettled([
           categoryService.getMainCategories(),
           productService.getProducts({ limit: 8, sortBy: 'newest' }),
+          homepageService.getCarouselSlides(),
         ]);
         setCategories(cats.status === 'fulfilled' ? (cats.value ?? []).slice(0, 6) : []);
         setFeaturedProducts(prods.status === 'fulfilled' ? prods.value?.products ?? [] : []);
+
+        if (slides.status === 'fulfilled' && slides.value.length > 0) {
+          setCarouselSlides(
+            slides.value.map((s, i) => {
+              const preset = CAROUSEL_PRESETS[i % CAROUSEL_PRESETS.length];
+              return {
+                id: Number(s.id) || i,
+                title: s.title,
+                subtitle: '',
+                description: s.textContent ?? '',
+                ctaLabel: tr.common.seeCatalog,
+                ctaHref: s.redirectUrl ?? '/products',
+                image: s.imageUrl,
+                gradient: preset.gradient,
+                accentColor: preset.accentColor,
+              };
+            })
+          );
+        }
       } finally {
         setLoading(false);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -53,7 +93,7 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════
           HERO CAROUSEL
       ═══════════════════════════════════════ */}
-      <HeroCarousel />
+      <HeroCarousel slides={carouselSlides.length > 0 ? carouselSlides : undefined} />
 
       {/* ═══════════════════════════════════════
           TRUST STRIP
@@ -202,7 +242,13 @@ export default function HomePage() {
               ))}
             </div>
           ) : featuredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div
+              className={
+                isMobile
+                  ? 'space-y-4'
+                  : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'
+              }
+            >
               {featuredProducts.slice(0, 4).map((product, i) => (
                 <motion.div
                   key={product.id}
@@ -212,7 +258,7 @@ export default function HomePage() {
                   viewport={{ once: true }}
                   variants={fadeUp}
                 >
-                  <ProductCard product={product} />
+                  <ProductCard product={product} viewMode={isMobile ? 'list' : 'grid'} />
                 </motion.div>
               ))}
             </div>

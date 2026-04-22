@@ -55,17 +55,18 @@ export class AuthService {
     }
   }
 
-  // Déconnexion
+  // Déconnexion — on nettoie en local immédiatement, l'appel API est best-effort
   async logout(): Promise<void> {
-    try {
-      await apiService.post('/auth/logout');
-    } catch (error) {
-      // Continue même si l'API échoue
-      console.warn('Erreur lors de la déconnexion API:', error);
-    } finally {
-      // Nettoyer les tokens et données locales
-      apiService.clearTokens();
+    // Nettoyer les tokens et données locales en priorité
+    apiService.clearTokens();
+    if (typeof window !== 'undefined') {
       localStorage.removeItem('user_data');
+    }
+    // Appel API sans retry (si le backend échoue, on s'en fout, l'user est déjà déconnecté en local)
+    try {
+      await apiService.postNoRetry('/auth/logout');
+    } catch {
+      // silencieux
     }
   }
 

@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Package, ArrowLeft, Filter, Grid, List, SortAsc } from 'lucide-react';
 
 import { Category, Product } from '@/types/api';
-import { categoryService } from '@/services/categoryService';
+import { categoryService, invalidateCategoryCache } from '@/services/categoryService';
 import { productService } from '@/services/productService';
 import { useProductStore } from '@/stores/productStore';
 import ProductCard from '@/components/products/ProductCard';
@@ -43,34 +43,38 @@ export default function CategoryPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    if (slug) {
-      loadCategory();
-      loadProducts();
-    }
+    if (slug) loadCategory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   useEffect(() => {
-    loadProducts();
-  }, [currentPage, filters]);
+    if (category) loadProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category, currentPage, filters]);
 
-  const loadCategory = async () => {
+  const loadCategory = async (opts: { silent?: boolean } = {}) => {
     try {
-      setLoading(true);
-      setError(null);
+      if (!opts.silent) {
+        setLoading(true);
+        setError(null);
+      }
+      if (opts.silent) invalidateCategoryCache();
       const data = await categoryService.getCategoryBySlug(slug);
       setCategory(data);
     } catch (err: any) {
-      console.error('Erreur chargement catégorie:', err);
-      setError('Cette catégorie est temporairement indisponible');
+      if (!opts.silent) {
+        console.error('Erreur chargement catégorie:', err);
+        setError('Cette catégorie est temporairement indisponible');
+      }
     } finally {
-      setLoading(false);
+      if (!opts.silent) setLoading(false);
     }
   };
 
-  const loadProducts = async () => {
+  const loadProducts = async (opts: { silent?: boolean } = {}) => {
     if (!category) return;
-    
-    setProductsLoading(true);
+
+    if (!opts.silent) setProductsLoading(true);
     try {
       const data = await productService.getProducts({
         category: category.id,
@@ -80,11 +84,34 @@ export default function CategoryPage() {
       });
       setProducts(data.products);
     } catch (err: any) {
-      console.error('Erreur chargement produits:', err);
+      if (!opts.silent) console.error('Erreur chargement produits:', err);
     } finally {
-      setProductsLoading(false);
+      if (!opts.silent) setProductsLoading(false);
     }
   };
+
+  // Polling temps réel — refresh silencieux catégorie + produits toutes les
+  // 30s + au focus. Ne re-affiche aucun skeleton pour ne pas casser l'UX.
+  useEffect(() => {
+    if (!slug) return;
+    const tick = () => {
+      if (document.visibilityState !== 'visible') return;
+      loadCategory({ silent: true });
+      loadProducts({ silent: true });
+    };
+    const interval = window.setInterval(tick, 30000);
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') tick();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('focus', onVisibility);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('focus', onVisibility);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug, category, currentPage, filters]);
 
   const filteredProducts = getFilteredProducts();
 
@@ -122,14 +149,6 @@ export default function CategoryPage() {
         className="relative overflow-hidden"
         style={{ minHeight: 260, background: 'linear-gradient(135deg, #002740 0%, #003d5c 50%, #005580 100%)' }}
       >
-        {/* Image de fond si disponible */}
-        {category.image && (
-          <img
-            src={category.image}
-            alt={category.name}
-            className="absolute inset-0 w-full h-full object-cover opacity-20"
-          />
-        )}
         {/* Déco */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
           <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full opacity-10"
