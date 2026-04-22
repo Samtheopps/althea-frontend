@@ -1,376 +1,292 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { User, Package, MapPin, CreditCard, Settings, LogOut, Edit } from 'lucide-react';
+import {
+  User,
+  Package,
+  MapPin,
+  CreditCard,
+  Settings,
+  LogOut,
+  ChevronRight,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  Truck,
+} from 'lucide-react';
+import toast from 'react-hot-toast';
 
 import { useAuthStore } from '@/stores/authStore';
 import { useI18n } from '@/lib/i18n';
+import accountService, {
+  getAccountErrorMessage,
+  ORDER_STATUS_LABELS,
+} from '@/services/accountService';
+import type { Order, OrderStatus } from '@/types/account';
+
+const STATUS_META: Record<
+  OrderStatus,
+  { color: string; bg: string; icon: React.ElementType }
+> = {
+  PENDING: { color: '#b45309', bg: '#fef3c7', icon: Clock },
+  PROCESSING: { color: '#0369a1', bg: '#e0f2fe', icon: Package },
+  SHIPPED: { color: '#6d28d9', bg: '#ede9fe', icon: Truck },
+  DELIVERED: { color: '#065f46', bg: '#d1fae5', icon: CheckCircle2 },
+  CANCELLED: { color: '#991b1b', bg: '#fee2e2', icon: XCircle },
+};
+
+const fmt = (n: number | string | null | undefined) => {
+  const num = typeof n === 'string' ? parseFloat(n) : n;
+  if (num == null || Number.isNaN(num)) return '—';
+  return num.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
+// Le backend peut renvoyer le montant d'une commande sous divers noms
+const getOrderAmount = (order: Record<string, unknown>) =>
+  (order.totalAmount ??
+    order.total ??
+    order.totalTtc ??
+    order.grandTotal ??
+    order.amount) as number | string | null | undefined;
+
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
 
 export default function AccountPage() {
+  const router = useRouter();
   const { tr } = useI18n();
   const { user, logout } = useAuthStore();
-  const [activeTab, setActiveTab] = useState('profile');
 
-  const menuItems = [
-    { id: 'profile',   label: tr.account.profile,   icon: User,       href: '/account' },
-    { id: 'orders',    label: tr.nav.orders,         icon: Package,    href: '/account/orders' },
-    { id: 'addresses', label: tr.account.addresses,  icon: MapPin,     href: '/account/addresses' },
-    { id: 'payment',   label: tr.account.payment,    icon: CreditCard, href: '/account/payment' },
-    { id: 'settings',  label: tr.account.settings,   icon: Settings,   href: '/account/settings' },
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
+
+  useEffect(() => {
+    if (!user) router.replace('/login');
+  }, [user, router]);
+
+  const loadRecent = useCallback(async () => {
+    try {
+      setLoadingOrders(true);
+      const { data } = await accountService.getOrders({ limit: 3, page: 1 });
+      setRecentOrders(data);
+    } catch (err) {
+      // pas de toast ici : juste log, le dashboard reste utile
+      console.warn('[account] getOrders (recent) failed:', getAccountErrorMessage(err));
+    } finally {
+      setLoadingOrders(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user) loadRecent();
+  }, [user, loadRecent]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Déconnecté'); //TODO i18n
+      router.push('/');
+    } catch {
+      // logout tolerant : pas de toast erreur
+    }
+  };
+
+  if (!user) return null;
+
+  const shortcuts = [
+    {
+      id: 'orders',
+      label: tr.nav.orders,
+      desc: 'Suivre & télécharger vos factures', //TODO i18n
+      icon: Package,
+      href: '/account/orders',
+    },
+    {
+      id: 'addresses',
+      label: tr.account.addresses,
+      desc: 'Vos adresses de livraison', //TODO i18n
+      icon: MapPin,
+      href: '/account/addresses',
+    },
+    {
+      id: 'payment',
+      label: tr.account.payment,
+      desc: 'Cartes enregistrées', //TODO i18n
+      icon: CreditCard,
+      href: '/account/payment',
+    },
+    {
+      id: 'settings',
+      label: tr.account.settings,
+      desc: 'Informations & email', //TODO i18n
+      icon: Settings,
+      href: '/account/settings',
+    },
   ];
 
-  const handleLogout = () => {
-    logout();
-  };
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-black mb-4">
-            {tr.account.noAccess}
-          </h2>
-          <p className="text-black mb-6">
-            {tr.account.noAccessDesc}
-          </p>
-          <Link
-            href="/login"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary-hover transition-colors"
-          >
-            {tr.nav.login}
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* En-tête */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="md:flex md:items-center md:justify-between">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-3xl font-bold text-black">
-                {tr.account.title}
-              </h1>
-              <p className="mt-1 text-sm text-black">
-                Bienvenue, {user.firstName} {user.lastName}
-              </p>
-            </div>
-            <div className="mt-4 flex md:mt-0 md:ml-4">
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-black bg-white hover:bg-gray-50 transition-colors"
+    <div className="min-h-screen bg-slate-50">
+      {/* Hero */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-lg"
+                style={{ background: '#00a8b5' }}
               >
-                <LogOut className="mr-2 h-4 w-4" />
-                {tr.nav.logout}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-          {/* Navigation */}
-          <div className="lg:col-span-3">
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <nav className="space-y-1">
-                {menuItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
-                  
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveTab(item.id)}
-                      className={`w-full flex items-center px-4 py-3 text-sm font-medium transition-colors ${
-                        isActive
-                          ? 'bg-primary text-white'
-                          : 'text-black hover:bg-gray-50'
-                      }`}
-                    >
-                      <Icon className="mr-3 h-5 w-5" />
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </nav>
-            </div>
-
-            {/* Statistiques utilisateur */}
-            <div className="mt-6 bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-medium text-black mb-4">
-                {tr.account.activity}
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm text-black">{tr.account.ordersLabel}</span>
-                  <span className="text-sm font-medium text-black">0</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-black">{tr.account.totalSpent}</span>
-                  <span className="text-sm font-medium text-black">0,00 €</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-black">{tr.account.memberSince}</span>
-                  <span className="text-sm font-medium text-black">{new Date().toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}</span>
-                </div>
+                {(user.firstName?.[0] ?? '').toUpperCase()}
+                {(user.lastName?.[0] ?? '').toUpperCase()}
+              </div>
+              <div>
+                <h1 className="font-heading font-bold text-2xl text-slate-800">
+                  Bonjour, {user.firstName} {/* //TODO i18n */}
+                </h1>
+                <p className="text-sm text-slate-500 mt-0.5">{user.email}</p>
               </div>
             </div>
-          </div>
-
-          {/* Contenu principal */}
-          <div className="lg:col-span-9 mt-8 lg:mt-0">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {activeTab === 'profile' && <ProfileSection user={user} />}
-              {activeTab === 'orders' && <OrdersSection />}
-              {activeTab === 'addresses' && <AddressesSection />}
-              {activeTab === 'payment' && <PaymentSection />}
-              {activeTab === 'settings' && <SettingsSection />}
-            </motion.div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Composant Section Profil
-function ProfileSection({ user }: { user: any }) {
-  const { tr } = useI18n();
-  const [isEditing, setIsEditing] = useState(false);
-
-  return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-black">
-          {tr.account.personalInfo}
-        </h2>
-        <button
-          onClick={() => setIsEditing(!isEditing)}
-          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-black hover:bg-gray-50 transition-colors"
-        >
-          <Edit className="mr-2 h-4 w-4" />
-          {isEditing ? tr.common.cancel : tr.common.edit}
-        </button>
-      </div>
-
-      {isEditing ? (
-        <form className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-black mb-1">
-                {tr.auth.firstName}
-              </label>
-              <input
-                type="text"
-                defaultValue={user.firstName}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-primary focus:border-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-black mb-1">
-                {tr.auth.lastName}
-              </label>
-              <input
-                type="text"
-                defaultValue={user.lastName}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-primary focus:border-primary"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-black mb-1">
-              {tr.auth.email}
-            </label>
-            <input
-              type="email"
-              defaultValue={user.email}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-primary focus:border-primary"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-black mb-1">
-              {tr.account.phone}
-            </label>
-            <input
-              type="tel"
-              defaultValue={user.phone}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-primary focus:border-primary"
-            />
-          </div>
-          <div className="flex space-x-3">
             <button
-              type="submit"
-              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors self-start sm:self-auto"
             >
-              {tr.common.save}
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsEditing(false)}
-              className="px-4 py-2 border border-gray-300 text-black rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              {tr.common.cancel}
+              <LogOut className="w-4 h-4" />
+              {tr.nav.logout}
             </button>
           </div>
-        </form>
-      ) : (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-black">
-                {tr.auth.firstName}
-              </label>
-              <p className="mt-1 text-sm text-black">{user.firstName}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-black">
-                {tr.auth.lastName}
-              </label>
-              <p className="mt-1 text-sm text-black">{user.lastName}</p>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-black">
-              {tr.auth.email}
-            </label>
-            <p className="mt-1 text-sm text-black">{user.email}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-black">
-              {tr.account.phone}
-            </label>
-            <p className="mt-1 text-sm text-black">{user.phone || '—'}</p>
-          </div>
         </div>
-      )}
-    </div>
-  );
-}
-
-// Composant Section Commandes
-function OrdersSection() {
-  const { tr } = useI18n();
-  const orders: any[] = [];
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'delivered':
-        return 'text-green-800 bg-green-100';
-      case 'processing':
-        return 'text-yellow-800 bg-yellow-100';
-      case 'cancelled':
-        return 'text-red-800 bg-red-100';
-      default:
-        return 'text-black bg-gray-100';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'delivered':
-        return 'Livrée';
-      case 'processing':
-        return 'En cours';
-      case 'cancelled':
-        return 'Annulée';
-      default:
-        return status;
-    }
-  };
-
-  return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-black">
-          {tr.nav.orders}
-        </h2>
       </div>
 
-      {orders.length === 0 ? (
-        <div className="px-6 py-12 text-center">
-           <Package className="h-12 w-12 text-black mx-auto mb-4" />
-          <p className="text-black">{tr.account.ordersEmpty}</p>
-        </div>
-      ) : (
-        <div className="divide-y divide-gray-200">
-          {orders.map((order) => (
-            <div key={order.id} className="px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-4">
-                    <h3 className="text-lg font-medium text-black">
-                      {order.id}
-                    </h3>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                        order.status
-                      )}`}
-                    >
-                      {getStatusLabel(order.status)}
-                    </span>
-                  </div>
-                  <div className="mt-1 flex items-center space-x-4 text-sm text-black">
-                    <span>{new Date(order.date).toLocaleDateString('fr-FR')}</span>
-                    <span>{order.items} article{order.items > 1 ? 's' : ''}</span>
-                    <span className="font-medium">{order.total.toFixed(2)} €</span>
-                  </div>
-                </div>
-                <Link
-                  href={`/account/orders/${order.id}`}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-black hover:bg-gray-50 transition-colors"
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Shortcut cards */}
+        <section>
+          <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-3">
+            {/* //TODO i18n */}Raccourcis
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {shortcuts.map((s, idx) => {
+              const Icon = s.icon;
+              return (
+                <motion.div
+                  key={s.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
                 >
-                  {tr.account.seeDetails}
-                </Link>
-              </div>
+                  <Link
+                    href={s.href}
+                    className="group block bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:border-primary hover:shadow-md transition-all duration-200"
+                  >
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+                      style={{ background: '#e0f7f9' }}
+                    >
+                      <Icon className="w-5 h-5" style={{ color: '#00a8b5' }} />
+                    </div>
+                    <h3 className="font-semibold text-slate-800 text-sm mb-1">{s.label}</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed">{s.desc}</p>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Recent orders */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">
+              {/* //TODO i18n */}Dernières commandes
+            </h2>
+            <Link
+              href="/account/orders"
+              className="text-xs text-primary font-semibold hover:underline"
+            >
+              {/* //TODO i18n */}Tout voir
+            </Link>
+          </div>
+
+          {loadingOrders ? (
+            <div className="space-y-3">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 animate-pulse"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="h-6 w-20 rounded-full bg-slate-200" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 bg-slate-200 rounded w-1/3" />
+                      <div className="h-2.5 bg-slate-100 rounded w-1/4" />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Composants simplifiés pour les autres sections
-function AddressesSection() {
-  const { tr } = useI18n();
-  return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 className="text-xl font-semibold text-black mb-4">
-        {tr.account.addresses}
-      </h2>
-    </div>
-  );
-}
-
-function PaymentSection() {
-  const { tr } = useI18n();
-  return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 className="text-xl font-semibold text-black mb-4">
-        {tr.account.payment}
-      </h2>
-    </div>
-  );
-}
-
-function SettingsSection() {
-  const { tr } = useI18n();
-  return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 className="text-xl font-semibold text-black mb-4">
-        {tr.account.settings}
-      </h2>
+          ) : recentOrders.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-2xl border border-slate-200">
+              <div
+                className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center"
+                style={{ background: '#e0f7f9' }}
+              >
+                <Package className="w-7 h-7" style={{ color: '#00a8b5' }} />
+              </div>
+              <h3 className="font-semibold text-slate-800 text-sm mb-1">
+                {tr.account.ordersEmpty}
+              </h3>
+              <Link
+                href="/products"
+                className="inline-block mt-3 text-xs font-semibold text-primary hover:underline"
+              >
+                {/* //TODO i18n */}Découvrir nos produits
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recentOrders.map((order) => {
+                const meta = STATUS_META[order.status] ?? STATUS_META.PENDING;
+                const StatusIcon = meta.icon;
+                return (
+                  <Link
+                    key={order.id}
+                    href={`/account/orders/${order.id}`}
+                    className="flex items-center gap-4 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 hover:border-primary transition-colors"
+                  >
+                    <span
+                      className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0"
+                      style={{ color: meta.color, background: meta.bg }}
+                    >
+                      <StatusIcon className="w-3.5 h-3.5" />
+                      {ORDER_STATUS_LABELS[order.status]}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-slate-800 text-sm truncate">
+                        {order.orderNumber || order.id}
+                      </p>
+                      <p className="text-xs text-slate-400">{fmtDate(order.createdAt)}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-bold text-slate-800 text-sm">
+                        {fmt(getOrderAmount(order as unknown as Record<string, unknown>))} €
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        {tr.account.ordersArticles(order.items?.length ?? 0)}
+                      </p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

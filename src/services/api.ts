@@ -115,6 +115,11 @@ class ApiService {
     return this.requestWithRetry(() => this.api.post(url, data, config));
   }
 
+  // Version sans retry : pour les appels "best-effort" (ex: logout)
+  async postNoRetry<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    return this.api.post(url, data, config);
+  }
+
   async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     return this.requestWithRetry(() => this.api.put(url, data, config));
   }
