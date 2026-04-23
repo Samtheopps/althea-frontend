@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -14,6 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  Search,
+  Calendar,
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -72,6 +74,8 @@ export default function AccountOrdersPage() {
     totalPages: 1,
   });
   const [filterStatus, setFilterStatus] = useState<OrderStatus | 'all'>('all');
+  const [filterYear, setFilterYear] = useState<number | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -142,10 +146,61 @@ export default function AccountOrdersPage() {
     };
   }, [user, pagination.page, filterStatus, loadOrders]);
 
+  // Liste des années distinctes présentes dans les commandes chargées.
+  const availableYears = useMemo(() => {
+    const set = new Set<number>();
+    for (const o of orders) {
+      const d = new Date(o.createdAt);
+      if (!Number.isNaN(d.getTime())) set.add(d.getFullYear());
+    }
+    return Array.from(set).sort((a, b) => b - a);
+  }, [orders]);
+
+  // Commandes filtrées côté client par année + recherche libre
+  // (le statut et la pagination sont déjà gérés par le backend).
+  const visibleOrders = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return orders.filter((o) => {
+      if (filterYear !== 'all') {
+        const y = new Date(o.createdAt).getFullYear();
+        if (y !== filterYear) return false;
+      }
+      if (q) {
+        const ref = `${o.orderNumber ?? ''} ${o.id ?? ''}`.toLowerCase();
+        const inItems = (o.items ?? []).some((it) =>
+          (it.productName ?? '').toLowerCase().includes(q),
+        );
+        if (!ref.includes(q) && !inItems) return false;
+      }
+      return true;
+    });
+  }, [orders, filterYear, searchQuery]);
+
+  // Regroupement par année, ordre décroissant.
+  const groupedByYear = useMemo(() => {
+    const map = new Map<number, Order[]>();
+    for (const o of visibleOrders) {
+      const y = new Date(o.createdAt).getFullYear();
+      if (!map.has(y)) map.set(y, []);
+      map.get(y)!.push(o);
+    }
+    return Array.from(map.entries()).sort((a, b) => b[0] - a[0]);
+  }, [visibleOrders]);
+
   if (!user) return null;
 
   const handleFilterChange = (status: OrderStatus | 'all') => {
     setFilterStatus(status);
+    setPagination((p) => ({ ...p, page: 1 }));
+  };
+
+  const hasActiveFilters =
+    filterStatus !== 'all' || filterYear !== 'all' || searchQuery.trim().length > 0;
+
+  const resetAllFilters = () => {
+    setFilterStatus('all');
+    setFilterYear('all');
+    setSearchQuery('');
     setPagination((p) => ({ ...p, page: 1 }));
   };
 
@@ -182,7 +237,29 @@ export default function AccountOrdersPage() {
 
         {/* Filters */}
         <div className="mb-6 space-y-3">
-          <div className="flex gap-3">
+          {/* Barre de recherche toujours visible */}
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Rechercher par n° de commande ou nom de produit…"
+              className="w-full pl-10 pr-10 py-2.5 text-sm text-slate-800 border border-slate-200 rounded-lg bg-white focus:border-primary focus:outline-none transition-all"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                aria-label="Effacer la recherche"
+              >
+                <XCircle className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex gap-3 flex-wrap">
             <button
               onClick={() => setShowFilters((v) => !v)}
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border transition-all ${
@@ -193,11 +270,11 @@ export default function AccountOrdersPage() {
             >
               <Filter className="w-4 h-4" />
               {tr.account.ordersFiltersBtn}
-              {filterStatus !== 'all' && <span className="w-2 h-2 rounded-full bg-amber-400" />}
+              {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-amber-400" />}
             </button>
-            {filterStatus !== 'all' && (
+            {hasActiveFilters && (
               <button
-                onClick={() => handleFilterChange('all')}
+                onClick={resetAllFilters}
                 className="text-xs text-primary hover:underline self-center"
               >
                 {tr.account.ordersResetFilters}
@@ -213,25 +290,48 @@ export default function AccountOrdersPage() {
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden"
               >
-                <div className="pt-1">
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 flex items-center gap-1">
-                    <Package className="w-3.5 h-3.5" />
-                    {tr.account.ordersStatusFilter}
-                  </label>
-                  <select
-                    value={filterStatus}
-                    onChange={(e) =>
-                      handleFilterChange(e.target.value as OrderStatus | 'all')
-                    }
-                    className={inputCls}
-                  >
-                    <option value="all">{tr.account.ordersAllStatuses}</option>
-                    {ALL_STATUSES.map((s) => (
-                      <option key={s} value={s}>
-                        {STATUS_CONFIG[s].label}
-                      </option>
-                    ))}
-                  </select>
+                <div className="pt-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1.5 flex items-center gap-1">
+                      <Package className="w-3.5 h-3.5" />
+                      {tr.account.ordersStatusFilter}
+                    </label>
+                    <select
+                      value={filterStatus}
+                      onChange={(e) =>
+                        handleFilterChange(e.target.value as OrderStatus | 'all')
+                      }
+                      className={inputCls}
+                    >
+                      <option value="all">{tr.account.ordersAllStatuses}</option>
+                      {ALL_STATUSES.map((s) => (
+                        <option key={s} value={s}>
+                          {STATUS_CONFIG[s].label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-500 mb-1.5 flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      Année
+                    </label>
+                    <select
+                      value={filterYear === 'all' ? 'all' : String(filterYear)}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setFilterYear(v === 'all' ? 'all' : Number(v));
+                      }}
+                      className={inputCls}
+                    >
+                      <option value="all">Toutes les années</option>
+                      {availableYears.map((y) => (
+                        <option key={y} value={y}>
+                          {y}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -259,7 +359,7 @@ export default function AccountOrdersPage() {
           </div>
         )}
 
-        {/* Empty */}
+        {/* Empty (aucune commande du tout) */}
         {!loading && orders.length === 0 && (
           <div className="text-center py-16 bg-white rounded-2xl border border-slate-200">
             <div
@@ -277,56 +377,86 @@ export default function AccountOrdersPage() {
           </div>
         )}
 
-        {/* Liste */}
-        {!loading && orders.length > 0 && (
+        {/* Filtres actifs : aucune correspondance */}
+        {!loading && orders.length > 0 && visibleOrders.length === 0 && (
+          <div className="text-center py-12 bg-white rounded-2xl border border-slate-200">
+            <Search className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+            <h3 className="font-semibold text-slate-800 mb-1">Aucun résultat</h3>
+            <p className="text-sm text-slate-500 mb-4">
+              Aucune commande ne correspond aux filtres sélectionnés.
+            </p>
+            <button
+              onClick={resetAllFilters}
+              className="text-sm text-primary font-semibold hover:underline"
+            >
+              Réinitialiser les filtres
+            </button>
+          </div>
+        )}
+
+        {/* Liste groupée par année */}
+        {!loading && visibleOrders.length > 0 && (
           <>
-            <div className="space-y-3">
-              {orders.map((order) => {
-                const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.PENDING;
-                const StatusIcon = cfg.icon;
-                const itemsCount = order.items?.length ?? 0;
+            <div className="space-y-8">
+              {groupedByYear.map(([year, yearOrders]) => (
+                <section key={year}>
+                  <h2 className="font-heading font-bold text-sm uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+                    <Calendar className="w-3.5 h-3.5" />
+                    {year}
+                    <span className="text-slate-300 font-normal normal-case tracking-normal">
+                      · {yearOrders.length} commande{yearOrders.length > 1 ? 's' : ''}
+                    </span>
+                  </h2>
+                  <div className="space-y-3">
+                    {yearOrders.map((order) => {
+                      const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.PENDING;
+                      const StatusIcon = cfg.icon;
+                      const itemsCount = order.items?.length ?? 0;
 
-                return (
-                  <motion.div
-                    key={order.id}
-                    layout
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
-                  >
-                    <Link
-                      href={`/account/orders/${order.id}`}
-                      className="w-full text-left px-5 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors"
-                    >
-                      <span
-                        className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0"
-                        style={{ color: cfg.color, background: cfg.bg }}
-                      >
-                        <StatusIcon className="w-3.5 h-3.5" />
-                        {cfg.label}
-                      </span>
+                      return (
+                        <motion.div
+                          key={order.id}
+                          layout
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+                        >
+                          <Link
+                            href={`/account/orders/${order.id}`}
+                            className="w-full text-left px-5 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors"
+                          >
+                            <span
+                              className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0"
+                              style={{ color: cfg.color, background: cfg.bg }}
+                            >
+                              <StatusIcon className="w-3.5 h-3.5" />
+                              {cfg.label}
+                            </span>
 
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-slate-800 text-sm truncate">
-                          {order.orderNumber || order.id}
-                        </p>
-                        <p className="text-xs text-slate-400">{fmtDate(order.createdAt)}</p>
-                      </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-slate-800 text-sm truncate">
+                                {order.orderNumber || order.id}
+                              </p>
+                              <p className="text-xs text-slate-400">{fmtDate(order.createdAt)}</p>
+                            </div>
 
-                      <div className="text-right flex-shrink-0">
-                        <p className="font-bold text-slate-800 text-sm">
-                          {fmt(getOrderTotal(order as unknown as Record<string, unknown>))} €
-                        </p>
-                        <p className="text-xs text-slate-400">
-                          {tr.account.ordersArticles(itemsCount)}
-                        </p>
-                      </div>
+                            <div className="text-right flex-shrink-0">
+                              <p className="font-bold text-slate-800 text-sm">
+                                {fmt(getOrderTotal(order as unknown as Record<string, unknown>))} €
+                              </p>
+                              <p className="text-xs text-slate-400">
+                                {tr.account.ordersArticles(itemsCount)}
+                              </p>
+                            </div>
 
-                      <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                    </Link>
-                  </motion.div>
-                );
-              })}
+                            <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                          </Link>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </section>
+              ))}
             </div>
 
             {/* Pagination */}
