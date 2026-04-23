@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import {
   CheckCircle2,
   Package,
@@ -13,13 +14,15 @@ import {
   Truck,
   XCircle,
   AlertTriangle,
+  FileText,
+  Loader2,
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import Logo from '@/components/ui/Logo';
 import { useI18n } from '@/lib/i18n';
 import checkoutService from '@/services/checkoutService';
-import accountService from '@/services/accountService';
-import type { Address } from '@/types/account';
+import accountService, { getAccountErrorMessage } from '@/services/accountService';
+import type { Address, Order } from '@/types/account';
 
 /* ── Types flexibles pour absorber les deux shapes d'Order ── */
 type RawOrder = {
@@ -138,6 +141,19 @@ function ConfirmationContent() {
   const [loading, setLoading] = useState(true);
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
+
+  const handleDownloadInvoice = async () => {
+    if (!order || downloadingInvoice) return;
+    try {
+      setDownloadingInvoice(true);
+      await accountService.downloadInvoicePdf(order as unknown as Order);
+    } catch (err) {
+      toast.error(getAccountErrorMessage(err, 'Impossible de télécharger la facture.'));
+    } finally {
+      setDownloadingInvoice(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -621,6 +637,23 @@ function ConfirmationContent() {
             )}
           </div>
         </div>
+
+        {/* ── Invoice PDF ── */}
+        {order.id && (
+          <button
+            onClick={handleDownloadInvoice}
+            disabled={downloadingInvoice}
+            className="flex items-center justify-center gap-2 py-3 px-5 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {downloadingInvoice ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <FileText className="w-4 h-4" />
+            )}
+            {/* //TODO i18n */}
+            {downloadingInvoice ? 'Téléchargement…' : 'Télécharger la facture (PDF)'}
+          </button>
+        )}
 
         {/* ── Actions ── */}
         <div className="flex flex-col sm:flex-row gap-3">
