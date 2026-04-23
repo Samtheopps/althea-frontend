@@ -11,6 +11,7 @@ import type {
   Order,
   ConfirmResponse,
   UserAddress,
+  GuestCheckoutData,
 } from '@/types/checkout';
 
 // ──────────────────────────────────────────────────────────────
@@ -128,6 +129,31 @@ class CheckoutService {
     const res = await apiService.post<ApiResponse<CheckoutSession>>('/checkout/shipping', {
       addressId,
       shippingMethodId,
+    });
+    return unwrap<CheckoutSession>(res);
+  }
+
+  /* ── 4 bis. Shipping session (invité) ─────────────────── */
+  // Variante pour le guest checkout : on pousse l'adresse et l'email
+  // directement dans le payload au lieu d'un addressId persistant.
+  async createGuestShippingSession(
+    guest: GuestCheckoutData,
+    shippingMethodId: string,
+  ): Promise<CheckoutSession> {
+    const res = await apiService.post<ApiResponse<CheckoutSession>>('/checkout/shipping', {
+      shippingMethodId,
+      guestEmail: guest.email,
+      guestAddress: {
+        firstName: guest.firstName,
+        lastName: guest.lastName,
+        phone: guest.phone,
+        street: guest.street,
+        addressComplement: guest.addressComplement,
+        city: guest.city,
+        region: guest.region,
+        postalCode: guest.postalCode,
+        country: guest.country,
+      },
     });
     return unwrap<CheckoutSession>(res);
   }

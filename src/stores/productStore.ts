@@ -118,25 +118,49 @@ export const useProductStore = create<ProductState>()((set, get) => ({
     }
 
     // Sort products
-    if (filters.sortBy) {
-      switch (filters.sortBy) {
-        case 'price_asc':
-          filtered.sort((a, b) => a.price - b.price);
-          break;
-        case 'price_desc':
-          filtered.sort((a, b) => b.price - a.price);
-          break;
-        case 'name_asc':
-          filtered.sort((a, b) => a.name.localeCompare(b.name));
-          break;
-        case 'name_desc':
-          filtered.sort((a, b) => b.name.localeCompare(a.name));
-          break;
-        case 'newest':
-          filtered.sort((a, b) => 
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-          break;
+    // Par défaut : tri "availability" pour respecter la règle métier
+    // (produits prioritaires d'abord, puis dispos, puis ruptures).
+    const sortMode = filters.sortBy ?? 'availability';
+    switch (sortMode) {
+      case 'price_asc':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price_desc':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'name_asc':
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'name_desc':
+        filtered.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case 'newest':
+        filtered.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+        break;
+      case 'availability':
+      default: {
+        const isAvailable = (p: Product) =>
+          p.stock === undefined || p.stock === null || p.stock > 0;
+        filtered.sort((a, b) => {
+          // 1) Produits prioritaires avant les autres
+          const aP = a.isPriority ? 1 : 0;
+          const bP = b.isPriority ? 1 : 0;
+          if (aP !== bP) return bP - aP;
+
+          // 2) Produits disponibles avant les ruptures
+          const aA = isAvailable(a) ? 1 : 0;
+          const bA = isAvailable(b) ? 1 : 0;
+          if (aA !== bA) return bA - aA;
+
+          // 3) Puis par displayOrder puis alphabétique
+          const orderDiff = (a.displayOrder ?? 999) - (b.displayOrder ?? 999);
+          if (orderDiff !== 0) return orderDiff;
+          return a.name.localeCompare(b.name);
+        });
+        break;
       }
     }
 

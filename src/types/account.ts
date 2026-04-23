@@ -91,6 +91,11 @@ export interface OrderShippingAddress {
   phone?: string;
 }
 
+export interface OrderInvoiceRef {
+  id: string;
+  number?: string;
+}
+
 export interface Order {
   id: string;
   orderNumber: string;
@@ -105,6 +110,10 @@ export interface Order {
   currency?: string;
   paymentStatus?: string;
   shippingMethod?: { id: string; name: string; code?: string };
+  // La commande peut embarquer la référence de sa facture directement.
+  invoice?: OrderInvoiceRef;
+  invoiceId?: string;
+  invoiceNumber?: string;
   createdAt: string;
   updatedAt?: string;
 }

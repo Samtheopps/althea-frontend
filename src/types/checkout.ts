@@ -155,3 +155,18 @@ export interface UserAddress {
   addressComplement?: string;
   phone?: string;
 }
+
+/* ── Checkout invité ───────────────────────────────────── */
+// Données saisies par un invité (sans compte) pendant le checkout.
+export interface GuestCheckoutData {
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  street: string;
+  addressComplement?: string;
+  city: string;
+  region?: string;
+  postalCode: string;
+  country: string;
+}

@@ -36,6 +36,7 @@ import checkoutService, {
 import type {
   ShippingOption,
   UserAddress,
+  GuestCheckoutData,
 } from '@/types/checkout';
 import StripePaymentForm from '@/components/checkout/StripePaymentForm';
 
@@ -102,6 +103,21 @@ export default function CheckoutPage() {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [termsAgreed, setTermsAgreed] = useState(false);
 
+  /* ── Mode invité ──────────────────────────────────────── */
+  const [isGuest, setIsGuest] = useState(false);
+  const [guestData, setGuestData] = useState<GuestCheckoutData>({
+    email: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+    street: '',
+    addressComplement: '',
+    city: '',
+    region: '',
+    postalCode: '',
+    country: 'France',
+  });
+
   /* ── Shipping options & addresses ─────────────────────── */
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
   const [selectedShippingId, setSelectedShippingId] = useState<string | null>(null);
@@ -141,17 +157,19 @@ export default function CheckoutPage() {
 
   /* ── Étape 2 : sync cart + charger shipping options + adresses ─ */
   useEffect(() => {
-    if (currentStep !== 2 || !isAuthenticated || !isHydrated) return;
+    if (currentStep !== 2 || !isHydrated) return;
+    if (!isAuthenticated && !isGuest) return;
 
     let cancelled = false;
     setLoadingShippingStep(true);
 
     (async () => {
       try {
-        // 0) Synchroniser le panier local (localStorage Zustand) vers le backend.
-        // Indispensable car /checkout/validate regarde le panier côté serveur (DB),
-        // pas celui du navigateur.
-        if (items.length > 0) {
+        // 0) Synchroniser le panier local (si user loggé).
+        // En mode invité, le panier local reste la source de vérité :
+        // le backend créera la commande à partir des items envoyés au moment
+        // de la session shipping.
+        if (isAuthenticated && items.length > 0) {
           await checkoutService.mergeAnonymousCart(
             items.map((i) => ({
               productId: i.product.id,
@@ -160,37 +178,44 @@ export default function CheckoutPage() {
           );
         }
 
-        // 1) Valider le panier backend
-        const validation = await checkoutService.validateCart();
-        if (cancelled) return;
-        if (!validation.valid) {
-          const firstError = validation.errors?.[0];
-          toast.error(firstError?.message || 'Panier invalide.');
-          return; // on reste sur la page — l'user peut retenter ou retourner au panier manuellement
+        // 1) Valider le panier backend (uniquement si connecté ; en guest
+        //    la validation se fait au moment de la session shipping).
+        if (isAuthenticated) {
+          const validation = await checkoutService.validateCart();
+          if (cancelled) return;
+          if (!validation.valid) {
+            const firstError = validation.errors?.[0];
+            toast.error(firstError?.message || 'Panier invalide.');
+            return;
+          }
         }
 
-        // 2) Charger options + adresses en parallèle
-        const [options, userAddresses] = await Promise.all([
-          checkoutService.getShippingOptions(),
-          checkoutService.getUserAddresses(),
-        ]);
-
+        // 2) Charger les options de livraison. En mode invité, on ne
+        //    fetch pas les adresses enregistrées (l'user n'est pas loggé).
+        const options = await checkoutService.getShippingOptions();
         if (cancelled) return;
 
         setShippingOptions(options);
-        // Présélectionner "standard" par défaut, sinon le premier
         const defaultOption =
           options.find((o) => o.id === 'standard' || o.code === 'standard') || options[0];
         if (defaultOption) setSelectedShippingId(defaultOption.id);
 
-        setAddresses(userAddresses);
-        const defaultAddr =
-          userAddresses.find((a) => a.isDefault) || userAddresses[0];
-        if (defaultAddr) {
-          setSelectedAddressId(defaultAddr.id);
-          setNoAddressYet(false);
+        if (isAuthenticated) {
+          const userAddresses = await checkoutService.getUserAddresses();
+          if (cancelled) return;
+          setAddresses(userAddresses);
+          const defaultAddr =
+            userAddresses.find((a) => a.isDefault) || userAddresses[0];
+          if (defaultAddr) {
+            setSelectedAddressId(defaultAddr.id);
+            setNoAddressYet(false);
+          } else {
+            setNoAddressYet(true);
+          }
         } else {
-          setNoAddressYet(true);
+          // Mode invité : pas d'adresse enregistrée, on va saisir inline.
+          setAddresses([]);
+          setNoAddressYet(false);
         }
       } catch (err) {
         if (!cancelled) {
@@ -205,7 +230,7 @@ export default function CheckoutPage() {
     return () => {
       cancelled = true;
     };
-  }, [currentStep, isAuthenticated, isHydrated, items, router]);
+  }, [currentStep, isAuthenticated, isGuest, isHydrated, items, router]);
 
   /* ── Totaux affichage (fallback client) ────────────────── */
   // Les prix du panier sont TTC (product.price = product.priceTtc côté backend).
@@ -222,19 +247,43 @@ export default function CheckoutPage() {
   const goToPayment = useCallback(async () => {
     setPaymentError(null);
 
-    if (noAddressYet) {
-      toast.error(
-        "Aucune adresse enregistrée. Ajoutez une adresse depuis votre compte avant de commander.", //TODO i18n
-      );
-      return;
-    }
-    if (!selectedAddressId) {
-      toast.error('Veuillez sélectionner une adresse de livraison.'); //TODO i18n
-      return;
-    }
     if (!selectedShippingId) {
       toast.error('Veuillez sélectionner un mode de livraison.'); //TODO i18n
       return;
+    }
+
+    // Validation spécifique : mode user connecté vs mode invité
+    if (!isGuest) {
+      if (noAddressYet) {
+        toast.error(
+          "Aucune adresse enregistrée. Ajoutez une adresse depuis votre compte avant de commander.", //TODO i18n
+        );
+        return;
+      }
+      if (!selectedAddressId) {
+        toast.error('Veuillez sélectionner une adresse de livraison.'); //TODO i18n
+        return;
+      }
+    } else {
+      // Validation du formulaire invité
+      const required: Array<[keyof GuestCheckoutData, string]> = [
+        ['email', 'email'],
+        ['firstName', 'prénom'],
+        ['lastName', 'nom'],
+        ['street', 'adresse'],
+        ['city', 'ville'],
+        ['postalCode', 'code postal'],
+        ['country', 'pays'],
+      ];
+      const missing = required.find(([k]) => !guestData[k]?.trim());
+      if (missing) {
+        toast.error(`Veuillez renseigner votre ${missing[1]}.`); //TODO i18n
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestData.email)) {
+        toast.error('Adresse email invalide.'); //TODO i18n
+        return;
+      }
     }
 
     setLoadingPayment(true);
@@ -243,11 +292,13 @@ export default function CheckoutPage() {
       const option = shippingOptions.find((o) => o.id === selectedShippingId);
       const shippingMethodId = (option?.id || option?.code || selectedShippingId).toLowerCase();
 
-      // 1) Créer la session shipping — retourne sessionId + totalAmount
-      const session = await checkoutService.createShippingSession(
-        selectedAddressId,
-        shippingMethodId,
-      );
+      // 1) Créer la session shipping — branche selon guest ou user
+      const session = isGuest
+        ? await checkoutService.createGuestShippingSession(guestData, shippingMethodId)
+        : await checkoutService.createShippingSession(
+            selectedAddressId as string,
+            shippingMethodId,
+          );
       const sessionId = session.sessionId || session.id;
       if (!sessionId) throw new Error('Session ID manquant dans la réponse.');
 
@@ -275,7 +326,7 @@ export default function CheckoutPage() {
     } finally {
       setLoadingPayment(false);
     }
-  }, [selectedAddressId, selectedShippingId, shippingOptions, noAddressYet]);
+  }, [selectedAddressId, selectedShippingId, shippingOptions, noAddressYet, isGuest, guestData]);
 
   /* ── Submit final : on bascule IMMÉDIATEMENT vers la page confirmation ── */
   // Le paiement Stripe est OK. Au lieu de bloquer ici en appelant confirmOrder,
@@ -365,14 +416,41 @@ export default function CheckoutPage() {
         </a>
       </div>
 
-      {/* Avis guest bloqué */}
-      <div className="flex items-start gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50">
-        <UserCheck className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-amber-800 leading-relaxed">
-          {/* //TODO i18n */}
-          Veuillez vous connecter pour finaliser la commande. Le paiement est réservé aux clients enregistrés.
-        </p>
+      {/* Séparateur */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-px bg-slate-200" />
+        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          {/* //TODO i18n */}ou
+        </span>
+        <div className="flex-1 h-px bg-slate-200" />
       </div>
+
+      {/* Guest checkout */}
+      <button
+        type="button"
+        onClick={() => {
+          setIsGuest(true);
+          setCurrentStep(2);
+        }}
+        className="group w-full flex items-center gap-4 p-5 rounded-xl border-2 border-slate-200 hover:border-primary hover:bg-primary-light transition-all duration-200 text-left"
+      >
+        <div
+          className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ background: '#e0f7f9' }}
+        >
+          <UserCheck className="w-6 h-6" style={{ color: '#00a8b5' }} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-slate-800 text-sm group-hover:text-primary transition-colors">
+            {/* //TODO i18n */}Continuer en tant qu&apos;invité
+          </p>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {/* //TODO i18n */}
+            Commandez sans créer de compte — vos informations ne seront pas enregistrées.
+          </p>
+        </div>
+        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-primary transition-colors" />
+      </button>
 
       <div className="flex items-center gap-3 p-4 rounded-xl bg-slate-50 border border-slate-100">
         <Lock className="w-4 h-4 text-slate-400 flex-shrink-0" />
@@ -401,7 +479,99 @@ export default function CheckoutPage() {
 
       {!loadingShippingStep && (
         <>
-          {/* ─── Adresses ─── */}
+          {/* ─── Formulaire invité ─── */}
+          {isGuest ? (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-semibold text-slate-700">
+                  {/* //TODO i18n */}Vos coordonnées
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {/* //TODO i18n */}
+                  Nous utiliserons ces informations pour vous envoyer la confirmation de commande.
+                </p>
+              </div>
+              <input
+                type="email"
+                placeholder="Adresse email *"
+                value={guestData.email}
+                onChange={(e) => setGuestData((d) => ({ ...d, email: e.target.value }))}
+                className="w-full px-4 py-2.5 text-sm text-slate-800 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:border-primary focus:outline-none transition-all"
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  placeholder="Prénom *"
+                  value={guestData.firstName}
+                  onChange={(e) => setGuestData((d) => ({ ...d, firstName: e.target.value }))}
+                  className="w-full px-4 py-2.5 text-sm text-slate-800 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:border-primary focus:outline-none transition-all"
+                />
+                <input
+                  type="text"
+                  placeholder="Nom *"
+                  value={guestData.lastName}
+                  onChange={(e) => setGuestData((d) => ({ ...d, lastName: e.target.value }))}
+                  className="w-full px-4 py-2.5 text-sm text-slate-800 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:border-primary focus:outline-none transition-all"
+                />
+              </div>
+              <input
+                type="tel"
+                placeholder="Téléphone mobile"
+                value={guestData.phone ?? ''}
+                onChange={(e) => setGuestData((d) => ({ ...d, phone: e.target.value }))}
+                className="w-full px-4 py-2.5 text-sm text-slate-800 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:border-primary focus:outline-none transition-all"
+              />
+
+              <p className="text-sm font-semibold text-slate-700 pt-2">
+                {/* //TODO i18n */}Adresse de livraison
+              </p>
+              <input
+                type="text"
+                placeholder="Adresse (rue, numéro) *"
+                value={guestData.street}
+                onChange={(e) => setGuestData((d) => ({ ...d, street: e.target.value }))}
+                className="w-full px-4 py-2.5 text-sm text-slate-800 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:border-primary focus:outline-none transition-all"
+              />
+              <input
+                type="text"
+                placeholder="Complément d'adresse (optionnel)"
+                value={guestData.addressComplement ?? ''}
+                onChange={(e) => setGuestData((d) => ({ ...d, addressComplement: e.target.value }))}
+                className="w-full px-4 py-2.5 text-sm text-slate-800 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:border-primary focus:outline-none transition-all"
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <input
+                  type="text"
+                  placeholder="Code postal *"
+                  value={guestData.postalCode}
+                  onChange={(e) => setGuestData((d) => ({ ...d, postalCode: e.target.value }))}
+                  className="w-full px-4 py-2.5 text-sm text-slate-800 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:border-primary focus:outline-none transition-all"
+                />
+                <input
+                  type="text"
+                  placeholder="Ville *"
+                  value={guestData.city}
+                  onChange={(e) => setGuestData((d) => ({ ...d, city: e.target.value }))}
+                  className="w-full px-4 py-2.5 text-sm text-slate-800 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:border-primary focus:outline-none transition-all"
+                />
+                <input
+                  type="text"
+                  placeholder="Région"
+                  value={guestData.region ?? ''}
+                  onChange={(e) => setGuestData((d) => ({ ...d, region: e.target.value }))}
+                  className="w-full px-4 py-2.5 text-sm text-slate-800 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:border-primary focus:outline-none transition-all"
+                />
+              </div>
+              <input
+                type="text"
+                placeholder="Pays *"
+                value={guestData.country}
+                onChange={(e) => setGuestData((d) => ({ ...d, country: e.target.value }))}
+                className="w-full px-4 py-2.5 text-sm text-slate-800 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white focus:border-primary focus:outline-none transition-all"
+              />
+            </div>
+          ) : (
+          /* ─── Adresses utilisateur connecté ─── */
           <div className="space-y-3">
             <p className="text-sm font-semibold text-slate-700">
               {/* //TODO i18n */}
@@ -478,6 +648,7 @@ export default function CheckoutPage() {
               </div>
             )}
           </div>
+          )}
 
           {/* ─── Méthode de livraison ─── */}
           {shippingOptions.length > 0 && (
@@ -541,7 +712,11 @@ export default function CheckoutPage() {
           <button
             type="button"
             onClick={goToPayment}
-            disabled={!selectedAddressId || !selectedShippingId || loadingPayment}
+            disabled={
+              (!isGuest && !selectedAddressId) ||
+              !selectedShippingId ||
+              loadingPayment
+            }
             className="btn btn-primary btn-lg w-full justify-center mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loadingPayment ? (

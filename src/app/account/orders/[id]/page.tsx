@@ -13,6 +13,7 @@ import {
   Truck,
   Loader2,
   AlertTriangle,
+  FileText,
 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -72,6 +73,7 @@ export default function OrderDetailPage() {
   const [cancelling, setCancelling] = useState(false);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
 
   useEffect(() => {
     if (!user) router.replace('/login');
@@ -141,6 +143,18 @@ export default function OrderDetailPage() {
       toast.error(getAccountErrorMessage(err, 'Impossible d\'annuler cette commande.'));
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleDownloadInvoice = async () => {
+    if (!order || downloadingInvoice) return;
+    try {
+      setDownloadingInvoice(true);
+      await accountService.downloadInvoicePdf(order);
+    } catch (err) {
+      toast.error(getAccountErrorMessage(err, 'Impossible de télécharger la facture.'));
+    } finally {
+      setDownloadingInvoice(false);
     }
   };
 
@@ -359,6 +373,39 @@ export default function OrderDetailPage() {
               {/* //TODO i18n */}Mode de livraison : {order.shippingMethod.name}
             </p>
           )}
+        </motion.div>
+
+        {/* Invoice download */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <FileText className="w-4 h-4 text-slate-400" />
+            <h2 className="font-semibold text-slate-800 text-sm">
+              {/* //TODO i18n */}Facture
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+            {/* //TODO i18n */}
+            Téléchargez votre facture au format PDF pour vos archives comptables.
+          </p>
+          <button
+            onClick={handleDownloadInvoice}
+            disabled={downloadingInvoice}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{ background: '#00a8b5' }}
+          >
+            {downloadingInvoice ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <FileText className="w-4 h-4" />
+            )}
+            {/* //TODO i18n */}
+            {downloadingInvoice ? 'Téléchargement…' : 'Télécharger la facture (PDF)'}
+          </button>
         </motion.div>
 
         {/* Cancel */}
