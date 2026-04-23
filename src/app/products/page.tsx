@@ -312,12 +312,12 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-subtle)]">
-      <Hero />
+      {Hero()}
 
       {/* Sticky-ish control bar */}
       <div className="relative border-b border-[var(--border)] bg-white/70 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-          <ActionBar />
+          {ActionBar()}
         </div>
       </div>
 
