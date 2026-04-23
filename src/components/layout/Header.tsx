@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { ShoppingCart, User, Menu, X, ChevronDown, LogOut, Package, Settings, FileText, Info, Phone, Scale } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, ChevronDown, LogOut, Package, Settings, FileText, Info, Phone, Scale, Receipt } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useCartStore } from '@/stores/cartStore';
 import GlobalSearch from './GlobalSearch';
@@ -142,6 +142,10 @@ export default function Header() {
                           <Package className="w-4 h-4 flex-shrink-0" />
                           {tr.nav.orders}
                         </Link>
+                        <Link href="/account/invoices" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-[#00a8b5] transition-colors">
+                          <Receipt className="w-4 h-4 flex-shrink-0" />
+                          {/* //TODO i18n */}Mes factures
+                        </Link>
                       </div>
                       <div className="border-t border-slate-100 py-1">
                         <button
@@ -234,6 +238,10 @@ export default function Header() {
                 <Link href="/account/orders" className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg">
                   <Package className="w-4 h-4" />
                   {tr.nav.orders}
+                </Link>
+                <Link href="/account/invoices" className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg">
+                  <Receipt className="w-4 h-4" />
+                  {/* //TODO i18n */}Mes factures
                 </Link>
                 <button
                   onClick={handleLogout}
