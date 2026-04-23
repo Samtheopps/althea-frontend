@@ -16,6 +16,7 @@ import {
   Clock,
   XCircle,
   Truck,
+  Receipt,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -104,9 +105,16 @@ export default function AccountPage() {
     {
       id: 'orders',
       label: tr.nav.orders,
-      desc: 'Suivre & télécharger vos factures', //TODO i18n
+      desc: 'Suivre vos commandes', //TODO i18n
       icon: Package,
       href: '/account/orders',
+    },
+    {
+      id: 'invoices',
+      label: 'Mes factures', //TODO i18n
+      desc: 'Consulter & télécharger vos factures', //TODO i18n
+      icon: Receipt,
+      href: '/account/invoices',
     },
     {
       id: 'addresses',

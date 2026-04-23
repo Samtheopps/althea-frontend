@@ -1,5 +1,6 @@
 import type { AxiosError, AxiosResponse } from 'axios';
 import apiService from './api';
+import invoiceService from './invoiceService';
 import type { ApiResponse } from '@/types/api';
 import type {
   AccountUser,
@@ -261,71 +262,30 @@ class AccountService {
   /**
    * Résout l'invoiceId pour une commande. On regarde d'abord les champs
    * potentiellement présents sur l'objet Order (invoice.id, invoiceId),
-   * puis on tombe en fallback sur `GET /orders/:id/invoice`.
+   * puis on interroge le service de factures (`GET /users/me/invoices`)
+   * pour retrouver celle dont l'orderId correspond.
    */
   async getInvoiceIdForOrder(order: Order): Promise<{ id: string; number?: string }> {
     if (order.invoice?.id) return { id: order.invoice.id, number: order.invoice.number };
     if (order.invoiceId) return { id: order.invoiceId, number: order.invoiceNumber };
 
-    // Fallback : tenter de récupérer la facture depuis le backend
-    const res = await apiService.get<ApiResponse<{ id: string; number?: string } | { invoice: { id: string; number?: string } }>>(
-      `/orders/${order.id}/invoice`,
-    );
-    const data = unwrap<{ id: string; number?: string } | { invoice: { id: string; number?: string } }>(res);
-    if (data && typeof data === 'object' && 'invoice' in data && data.invoice) {
-      return { id: data.invoice.id, number: data.invoice.number };
-    }
-    if (data && typeof data === 'object' && 'id' in data && typeof data.id === 'string') {
-      return { id: data.id, number: (data as { number?: string }).number };
-    }
+    const invoice = await invoiceService.findInvoiceForOrder(order.id);
+    if (invoice?.id) return { id: invoice.id, number: invoice.invoiceNumber };
+
     throw new Error('Facture introuvable pour cette commande.');
   }
 
   /**
    * Télécharge la facture PDF d'une commande.
-   * Le backend expose `GET /invoices/:invoiceId/pdf` avec Bearer auth,
-   * d'où le fetch en blob (impossible via un simple <a href>).
+   * Délègue à `invoiceService.downloadPdf` après résolution de l'invoiceId.
    */
   async downloadInvoicePdf(order: Order): Promise<void> {
-    const { id: invoiceId, number } = await this.getInvoiceIdForOrder(order);
-
-    const res = await apiService.get<Blob>(`/invoices/${invoiceId}/pdf`, {
-      responseType: 'blob',
+    const { id, number } = await this.getInvoiceIdForOrder(order);
+    await invoiceService.downloadPdf({
+      id,
+      invoiceNumber: number || `facture-${order.orderNumber || order.id}`,
     });
-
-    const blob = res.data instanceof Blob ? res.data : new Blob([res.data as BlobPart], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-
-    const filenameFromHeader = extractFilenameFromContentDisposition(
-      res.headers?.['content-disposition'] as string | undefined,
-    );
-    const filename =
-      filenameFromHeader ||
-      `facture-${number || order.orderNumber || order.id}.pdf`;
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   }
-}
-
-/** Extrait le filename d'un header Content-Disposition. */
-function extractFilenameFromContentDisposition(header?: string): string | null {
-  if (!header) return null;
-  const utf8 = /filename\*=UTF-8''([^;]+)/i.exec(header);
-  if (utf8?.[1]) {
-    try {
-      return decodeURIComponent(utf8[1]);
-    } catch {
-      // ignore
-    }
-  }
-  const plain = /filename="?([^";]+)"?/i.exec(header);
-  return plain?.[1] || null;
 }
 
 /* ── Libellés FR des statuts de commande ──────────────────── */
