@@ -109,9 +109,20 @@ function buildContext(categories: ApiCategory[], products: ApiProduct[]): string
 }
 
 /* ── System prompt base ── */
-const SYSTEM_PROMPT_BASE = `Tu es l'assistant virtuel d'Althea Systems, fournisseur d'équipements médicaux professionnels.
+const LANG_NAMES: Record<string, string> = {
+  fr: 'français',
+  en: 'English',
+  ar: 'العربية (Arabic)',
+  he: 'עברית (Hebrew)',
+};
+
+function buildSystemPrompt(locale: string): string {
+  const langName = LANG_NAMES[locale] || 'français';
+  return `Tu es l'assistant virtuel d'Althea Systems, fournisseur d'équipements médicaux professionnels.
 
 Le bloc "CATALOGUE" ci-dessus contient les données en temps réel de notre base. Utilise UNIQUEMENT ces données pour répondre aux questions.
+
+LANGUE DE RÉPONSE : ${langName} — TOUTES tes réponses doivent être rédigées en ${langName}, quelle que soit la langue de la question. Si le nom d'un produit est en français dans le catalogue, garde-le en français (c'est un nom propre) mais le reste de ta phrase doit être en ${langName}.
 
 Règles ABSOLUES :
 - N'affiche JAMAIS le bloc CATALOGUE dans ta réponse — c'est un contexte interne uniquement
@@ -119,9 +130,10 @@ Règles ABSOLUES :
 - Jamais de listes à puces sauf si on te demande explicitement plusieurs produits
 - Cite le nom exact du produit et son prix TTC
 - Ajoute le lien /products/<slug> en fin de réponse si pertinent
-- Si le produit n'est pas dans le contexte : "Je ne trouve pas ce produit. Contactez contact@altheasystems.fr"
+- Si le produit n'est pas dans le contexte : message d'invite à contacter contact@altheasystems.fr (dans la langue de réponse)
 - Zéro conseil médical, uniquement du matériel
 - Ton direct, professionnel, sans introduction ni conclusion`;
+}
 
 /* ── Route handler ── */
 export async function POST(req: NextRequest) {
@@ -131,6 +143,7 @@ export async function POST(req: NextRequest) {
   }
 
   const userMessages: { role: string; content: string }[] = body.messages;
+  const locale: string = typeof body.locale === 'string' ? body.locale : 'fr';
   const lastUserMsg = [...userMessages].reverse().find(m => m.role === 'user')?.content ?? '';
 
   // Fetch context in parallel
@@ -142,7 +155,7 @@ export async function POST(req: NextRequest) {
   const contextBlock = buildContext(categories, products);
 
   // Inject context into system prompt so the model treats it as instructions, not as text to echo
-  const systemPrompt = `## CATALOGUE\n${contextBlock}\n\n${SYSTEM_PROMPT_BASE}`;
+  const systemPrompt = `## CATALOGUE\n${contextBlock}\n\n${buildSystemPrompt(locale)}`;
 
   const ollamaMessages = [
     { role: 'system', content: systemPrompt },

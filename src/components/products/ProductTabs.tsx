@@ -6,6 +6,7 @@ import { FileText, Truck, Shield, Settings, Award } from 'lucide-react';
 
 import { Product } from '@/types/api';
 import { useI18n } from '@/lib/i18n';
+import { T } from '@/components/ui/TranslatedText';
 
 interface ProductTabsProps {
   product: Product;
@@ -29,9 +30,9 @@ export default function ProductTabs({ product }: ProductTabsProps) {
         return (
           <div className="space-y-6">
             <div className="text-black leading-relaxed font-medium">
-              {product.description}
+              <T>{product.description}</T>
             </div>
-            
+
             {product.features && product.features.length > 0 && (
               <div className="mt-6">
                 <h4 className="text-lg font-bold text-black mb-4">
@@ -39,7 +40,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
                 </h4>
                 <ul className="list-disc list-inside space-y-2 text-black font-medium">
                   {product.features.map((feature, index) => (
-                    <li key={index}>{feature}</li>
+                    <li key={index}><T>{feature}</T></li>
                   ))}
                 </ul>
               </div>
@@ -52,7 +53,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
                 </h4>
                 <ul className="list-disc list-inside space-y-2 text-black font-medium">
                   {product.applications.map((application, index) => (
-                    <li key={index}>{application}</li>
+                    <li key={index}><T>{application}</T></li>
                   ))}
                 </ul>
               </div>

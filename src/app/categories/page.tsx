@@ -30,6 +30,7 @@ import { Category } from '@/types/api';
 import { categoryService, invalidateCategoryCache } from '@/services/categoryService';
 import { CategoryCardSkeleton } from '@/components/ui/LoadingSpinner';
 import ErrorMessage from '@/components/ui/ErrorMessage';
+import { T } from '@/components/ui/TranslatedText';
 import { useI18n } from '@/lib/i18n';
 
 /* ---------- Helpers ---------- */
@@ -326,7 +327,7 @@ export default function CategoriesPage() {
                             isFeatured ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'
                           }`}
                         >
-                          {category.name}
+                          <T>{category.name}</T>
                         </h3>
                         <span
                           aria-hidden="true"
@@ -341,7 +342,7 @@ export default function CategoriesPage() {
 
                       {category.description && (
                         <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-slate-600">
-                          {category.description}
+                          <T maxLength={140}>{category.description}</T>
                         </p>
                       )}
 
