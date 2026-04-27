@@ -9,6 +9,7 @@ import type { Product } from '@/types/api';
 import { useCartStore } from '@/stores/cartStore';
 import { formatPrice } from '@/lib/utils';
 import ProductImage from '@/components/ui/ProductImage';
+import { T } from '@/components/ui/TranslatedText';
 import { useI18n } from '@/lib/i18n';
 
 interface ProductCardProps {
@@ -17,9 +18,9 @@ interface ProductCardProps {
 }
 
 function StockBadge({ stock }: { stock: number }) {
-  if (stock > 10) return <span className="stock-in">En stock</span>;
-  if (stock > 0)  return <span className="stock-low">Stock faible — {stock}</span>;
-  return <span className="stock-out">Rupture de stock</span>;
+  if (stock > 10) return <span className="stock-in"><T>En stock</T></span>;
+  if (stock > 0)  return <span className="stock-low"><T>Stock faible</T> — {stock}</span>;
+  return <span className="stock-out"><T>Rupture de stock</T></span>;
 }
 
 export function ProductCard({ product, viewMode = 'grid' }: ProductCardProps) {
@@ -74,10 +75,12 @@ export function ProductCard({ product, viewMode = 'grid' }: ProductCardProps) {
               <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">{product.brand}</p>
             )}
             <h3 className="font-semibold text-slate-800 line-clamp-2 text-sm leading-snug group-hover:text-[#00a8b5] transition-colors">
-              {product.name}
+              <T>{product.name}</T>
             </h3>
             {product.description && (
-              <p className="text-xs text-slate-500 line-clamp-2 mt-1">{product.description}</p>
+              <p className="text-xs text-slate-500 line-clamp-2 mt-1">
+                <T maxLength={120}>{product.description}</T>
+              </p>
             )}
           </div>
 
@@ -173,7 +176,7 @@ export function ProductCard({ product, viewMode = 'grid' }: ProductCardProps) {
 
         {/* Title */}
         <h3 className="font-semibold text-slate-800 line-clamp-2 leading-snug text-sm group-hover:text-[#00a8b5] transition-colors">
-          {product.name}
+          <T>{product.name}</T>
         </h3>
 
         {/* Rating */}

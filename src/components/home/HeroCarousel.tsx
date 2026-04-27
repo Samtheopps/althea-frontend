@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { T } from '@/components/ui/TranslatedText';
 
 export interface CarouselSlide {
   id: number;
@@ -55,6 +56,10 @@ export default function HeroCarousel({ slides: slidesProp }: HeroCarouselProps) 
   const { tr } = useI18n();
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
+
+  // Mode API : les textes viennent du backend (FR) — il faut les traduire dynamiquement.
+  // Mode i18n : les textes viennent du dictionnaire local (déjà dans la bonne langue) — pas de traduction.
+  const isFromApi = !!slidesProp;
 
   /* Build slides from i18n text + static config, unless caller passed explicit slides */
   const slides: CarouselSlide[] = slidesProp ?? SLIDE_CONFIG.map((cfg, i) => ({
@@ -153,21 +158,21 @@ export default function HeroCarousel({ slides: slidesProp }: HeroCarouselProps) 
 
               {/* Title */}
               <h1 className="font-heading font-bold text-4xl sm:text-5xl md:text-6xl text-white leading-tight tracking-tight">
-                {slide.title}
+                {isFromApi ? <T>{slide.title}</T> : slide.title}
                 <span className="block mt-1" style={{ color: slide.accentColor }}>
-                  {slide.subtitle}
+                  {isFromApi ? <T>{slide.subtitle}</T> : slide.subtitle}
                 </span>
               </h1>
 
               {/* Description */}
               <p className="mt-6 text-lg leading-relaxed max-w-xl" style={{ color: 'rgba(255,255,255,0.75)' }}>
-                {slide.description}
+                {isFromApi ? <T>{slide.description}</T> : slide.description}
               </p>
 
               {/* CTAs */}
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <Link href={slide.ctaHref} className="btn btn-primary btn-lg">
-                  {slide.ctaLabel}
+                  {isFromApi ? <T>{slide.ctaLabel}</T> : slide.ctaLabel}
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 {slide.secondaryLabel && (
@@ -176,7 +181,7 @@ export default function HeroCarousel({ slides: slidesProp }: HeroCarouselProps) 
                     className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-base font-semibold text-white transition-all duration-200"
                     style={{ border: '1.5px solid rgba(255,255,255,0.25)' }}
                   >
-                    {slide.secondaryLabel}
+                    {isFromApi ? <T>{slide.secondaryLabel}</T> : slide.secondaryLabel}
                   </Link>
                 )}
               </div>

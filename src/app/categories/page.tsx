@@ -30,6 +30,7 @@ import { Category } from '@/types/api';
 import { categoryService, invalidateCategoryCache } from '@/services/categoryService';
 import { CategoryCardSkeleton } from '@/components/ui/LoadingSpinner';
 import ErrorMessage from '@/components/ui/ErrorMessage';
+import { T } from '@/components/ui/TranslatedText';
 import { useI18n } from '@/lib/i18n';
 
 /* ---------- Helpers ---------- */
@@ -161,7 +162,7 @@ export default function CategoriesPage() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--secondary)] backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
-            Catalogue Althea
+            <T>Catalogue Althea</T>
           </div>
 
           <h1
@@ -172,9 +173,7 @@ export default function CategoriesPage() {
           </h1>
 
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
-            {/* TODO i18n */}
-            Parcourez l&rsquo;ensemble de nos gammes&nbsp;: du diagnostic à la chirurgie, en passant
-            par l&rsquo;équipement hospitalier et la protection individuelle.
+            <T>{"Parcourez l'ensemble de nos gammes : du diagnostic à la chirurgie, en passant par l'équipement hospitalier et la protection individuelle."}</T>
           </p>
 
           {categories.length > 0 && (
@@ -326,7 +325,7 @@ export default function CategoriesPage() {
                             isFeatured ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl'
                           }`}
                         >
-                          {category.name}
+                          <T>{category.name}</T>
                         </h3>
                         <span
                           aria-hidden="true"
@@ -341,7 +340,7 @@ export default function CategoriesPage() {
 
                       {category.description && (
                         <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-slate-600">
-                          {category.description}
+                          <T maxLength={140}>{category.description}</T>
                         </p>
                       )}
 

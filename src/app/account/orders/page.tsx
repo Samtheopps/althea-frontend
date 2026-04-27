@@ -26,6 +26,7 @@ import accountService, {
   ORDER_STATUS_LABELS,
 } from '@/services/accountService';
 import type { Order, OrderStatus, OrdersPagination } from '@/types/account';
+import { T } from '@/components/ui/TranslatedText';
 
 const STATUS_CONFIG: Record<
   OrderStatus,
@@ -430,7 +431,7 @@ export default function AccountOrdersPage() {
                               style={{ color: cfg.color, background: cfg.bg }}
                             >
                               <StatusIcon className="w-3.5 h-3.5" />
-                              {cfg.label}
+                              <T>{cfg.label}</T>
                             </span>
 
                             <div className="flex-1 min-w-0">

@@ -15,6 +15,7 @@ import ProductFilters from '@/components/products/ProductFilters';
 import ProductSort from '@/components/products/ProductSort';
 import LoadingSpinner, { ProductCardSkeleton } from '@/components/ui/LoadingSpinner';
 import ErrorMessage from '@/components/ui/ErrorMessage';
+import { T } from '@/components/ui/TranslatedText';
 import { useI18n } from '@/lib/i18n';
 
 export default function CategoryPage() {
@@ -162,15 +163,15 @@ export default function CategoryPage() {
             <span>/</span>
             <Link href="/categories" className="hover:text-white transition-colors">{tr.nav.categories}</Link>
             <span>/</span>
-            <span className="text-white font-medium">{category.name}</span>
+            <span className="text-white font-medium"><T>{category.name}</T></span>
           </nav>
 
           <h1 className="font-heading font-bold text-4xl md:text-5xl text-white mb-4 tracking-tight">
-            {category.name}
+            <T>{category.name}</T>
           </h1>
           {category.description && (
             <p className="text-lg max-w-2xl mb-6" style={{ color: 'rgba(255,255,255,0.75)' }}>
-              {category.description}
+              <T>{category.description}</T>
             </p>
           )}
           <span

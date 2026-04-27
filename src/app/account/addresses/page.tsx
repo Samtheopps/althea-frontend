@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useI18n } from '@/lib/i18n';
 import accountService, { getAccountErrorMessage } from '@/services/accountService';
+import { T } from '@/components/ui/TranslatedText';
 import type { Address, CreateAddressPayload } from '@/types/account';
 
 const EMPTY_FORM: CreateAddressPayload = {
@@ -329,7 +330,7 @@ export default function AccountAddressesPage() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                    {/* //TODO i18n */}Pays *
+                    <T>Pays</T> *
                   </label>
                   <input
                     value={form.country}
@@ -348,7 +349,7 @@ export default function AccountAddressesPage() {
                     className="w-4 h-4 accent-primary"
                   />
                   <span className="text-xs text-slate-600">
-                    {/* //TODO i18n */}Définir comme adresse par défaut
+                    <T>Définir comme adresse par défaut</T>
                   </span>
                 </label>
                 <div className="flex gap-3 pt-2">
