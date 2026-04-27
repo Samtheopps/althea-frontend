@@ -10,6 +10,7 @@ import ProductCard from '@/components/products/ProductCard';
 import ProductFilters from '@/components/products/ProductFilters';
 import ProductSort from '@/components/products/ProductSort';
 import ErrorMessage from '@/components/ui/ErrorMessage';
+import { T } from '@/components/ui/TranslatedText';
 import { useI18n } from '@/lib/i18n';
 
 export default function ProductsPage() {
@@ -151,7 +152,7 @@ export default function ProductsPage() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--secondary)] backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
-            {/* TODO i18n */} Catalogue Althea
+            <T>Catalogue Althea</T>
           </div>
 
           <h1
@@ -162,9 +163,7 @@ export default function ProductsPage() {
           </h1>
 
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
-            {/* TODO i18n */}
-            Explorez l&rsquo;intégralité de notre catalogue médical&nbsp;: dispositifs de diagnostic,
-            instruments chirurgicaux, équipements hospitaliers et consommables certifiés.
+            <T>{"Explorez l'intégralité de notre catalogue médical : dispositifs de diagnostic, instruments chirurgicaux, équipements hospitaliers et consommables certifiés."}</T>
           </p>
 
           {products.length > 0 && (

@@ -9,6 +9,7 @@ import type { Product, Category } from '@/types/api';
 import { productService } from '@/services/productService';
 import { categoryService } from '@/services/categoryService';
 import ProductCard from '@/components/products/ProductCard';
+import { T } from '@/components/ui/TranslatedText';
 import { useI18n } from '@/lib/i18n';
 
 /* ─────────────────────────────────────────────────────────────
@@ -261,14 +262,13 @@ function SearchInner() {
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#003d5c] backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-[#00a8b5]" />
-            Moteur de recherche
+            <T>Moteur de recherche</T>
           </div>
           <h1 className="mt-5 font-heading text-4xl sm:text-5xl font-bold tracking-tight text-[#003d5c]">
-            Trouvez votre équipement
+            <T>Trouvez votre équipement</T>
           </h1>
           <p className="mt-3 text-base text-slate-600 max-w-2xl">
-            Recherchez par nom, description, caractéristiques techniques ou marque —
-            les résultats sont classés par pertinence.
+            <T>{"Recherchez par nom, description, caractéristiques techniques ou marque — les résultats sont classés par pertinence."}</T>
           </p>
 
           {/* Search bar */}
