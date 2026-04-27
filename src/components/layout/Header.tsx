@@ -163,13 +163,13 @@ export default function Header() {
             ) : (
               <div className="hidden sm:flex items-center gap-2">
                 <Link
-                  href="/auth/login"
+                  href="/login"
                   className="px-3.5 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-all duration-200"
                 >
                   {tr.nav.login}
                 </Link>
                 <Link
-                  href="/auth/register"
+                  href="/register"
                   className="btn btn-primary btn-sm"
                 >
                   {tr.nav.register}
@@ -253,10 +253,10 @@ export default function Header() {
               </div>
             ) : (
               <div className="flex flex-col gap-2">
-                <Link href="/auth/login" className="flex items-center justify-center px-4 py-3 text-sm font-medium text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg transition-colors">
+                <Link href="/login" className="flex items-center justify-center px-4 py-3 text-sm font-medium text-slate-700 border border-slate-200 hover:bg-slate-50 rounded-lg transition-colors">
                   {tr.nav.login}
                 </Link>
-                <Link href="/auth/register" className="btn btn-primary justify-center">
+                <Link href="/register" className="btn btn-primary justify-center">
                   {tr.nav.createAccount}
                 </Link>
               </div>

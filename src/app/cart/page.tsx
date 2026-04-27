@@ -142,7 +142,7 @@ export default function CartPage() {
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <Link
-                href="/auth/login"
+                href="/login"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg text-white transition-colors"
                 style={{ background: '#003d5c' }}
               >
@@ -150,7 +150,7 @@ export default function CartPage() {
                 {tr.nav.login}
               </Link>
               <Link
-                href="/auth/register"
+                href="/register"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors"
                 style={{ background: '#00a8b5', color: '#fff' }}
               >
