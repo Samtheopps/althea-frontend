@@ -10,6 +10,7 @@ import { Product } from '@/types/api';
 import { productService } from '@/services/productService';
 import { formatPrice } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
+import { T } from '@/components/ui/TranslatedText';
 
 export default function GlobalSearch() {
   const { tr } = useI18n();
@@ -174,15 +175,14 @@ export default function GlobalSearch() {
                         {/* Product Info */}
                         <div className="flex-1 min-w-0">
                           <h4 className="text-sm font-medium text-black truncate">
-                            {product.name}
+                            <T>{product.name}</T>
                           </h4>
                           <p className="text-xs text-black truncate">
-                            {product.brand} • {product.category?.name}
+                            {product.brand} • <T>{product.category?.name}</T>
                           </p>
                           {(product.shortDescription || product.description) && (
                             <p className="text-xs text-gray-400 truncate mt-0.5">
-                              {(product.shortDescription || product.description).slice(0, 80)}
-                              {(product.shortDescription || product.description).length > 80 ? '…' : ''}
+                              <T maxLength={80}>{product.shortDescription || product.description}</T>
                             </p>
                           )}
                           <div className="flex items-center gap-2 mt-1">

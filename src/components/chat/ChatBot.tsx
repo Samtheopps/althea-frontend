@@ -13,7 +13,7 @@ interface Message {
 }
 
 export default function ChatBot() {
-  const { tr } = useI18n();
+  const { tr, locale } = useI18n();
 
   const WELCOME: Message = {
     id: 'welcome',
@@ -77,7 +77,7 @@ export default function ChatBot() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history }),
+        body: JSON.stringify({ messages: history, locale }),
         signal: abortRef.current.signal,
       });
 
@@ -123,7 +123,7 @@ export default function ChatBot() {
       setLoading(false);
       abortRef.current = null;
     }
-  }, [input, loading, messages]);
+  }, [input, loading, messages, locale]);
 
   const send = useCallback(() => sendMessage(input), [input, sendMessage]);
 

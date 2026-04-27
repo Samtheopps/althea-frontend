@@ -12,6 +12,7 @@ import { homepageService } from '@/services/homepageService';
 import ProductCard from '@/components/products/ProductCard';
 import { ProductCardSkeleton } from '@/components/ui/LoadingSpinner';
 import HeroCarousel, { type CarouselSlide } from '@/components/home/HeroCarousel';
+import { T } from '@/components/ui/TranslatedText';
 import { useI18n } from '@/lib/i18n';
 
 /* Visual presets cycled across API-driven slides (gradient + accent not stored server-side) */
@@ -187,7 +188,7 @@ export default function HomePage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="font-semibold text-slate-800 group-hover:text-[#00a8b5] transition-colors truncate text-sm">
-                        {cat.name}
+                        <T>{cat.name}</T>
                       </h3>
                       <p className="text-xs text-slate-400 mt-0.5">
                         {tr.products.found(cat.productCount ?? 0)}

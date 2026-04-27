@@ -18,6 +18,7 @@ import ProductImageCarousel from '@/components/products/ProductImageCarousel';
 import ProductTabs from '@/components/products/ProductTabs';
 import ProductSimilar from '@/components/products/ProductSimilar';
 import ProductReviews from '@/components/products/ProductReviews';
+import { T } from '@/components/ui/TranslatedText';
 import { useI18n } from '@/lib/i18n';
 
 /* ── Stock indicator ── */
@@ -152,12 +153,12 @@ export default function ProductPage() {
               <>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
                 <Link href={`/categories/${product.category.slug}`} className="text-slate-500 hover:text-primary transition-colors">
-                  {product.category.name}
+                  <T>{product.category.name}</T>
                 </Link>
               </>
             )}
             <ChevronRight className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
-            <span className="text-slate-800 font-medium truncate max-w-xs">{product.name}</span>
+            <span className="text-slate-800 font-medium truncate max-w-xs"><T>{product.name}</T></span>
           </nav>
         </div>
       </div>
@@ -182,10 +183,10 @@ export default function ProductPage() {
                 </p>
               )}
               <h1 className="font-heading font-bold text-3xl text-slate-900 leading-tight mb-3">
-                {product.name}
+                <T>{product.name}</T>
               </h1>
               <p className="text-slate-500 leading-relaxed text-sm">
-                {product.shortDescription ?? product.description}
+                <T>{product.shortDescription ?? product.description}</T>
               </p>
             </div>
 
