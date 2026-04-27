@@ -25,6 +25,7 @@ import accountService, {
   ORDER_STATUS_LABELS,
 } from '@/services/accountService';
 import type { Order, OrderStatus } from '@/types/account';
+import { T } from '@/components/ui/TranslatedText';
 
 const STATUS_META: Record<
   OrderStatus,
@@ -196,11 +197,10 @@ export default function OrderDetailPage() {
             <AlertTriangle className="w-7 h-7 text-amber-500" />
           </div>
           <h1 className="font-heading font-bold text-xl text-slate-800 mb-2">
-            {/* //TODO i18n */}Commande introuvable
+            <T>Commande introuvable</T>
           </h1>
           <p className="text-sm text-slate-500 mb-5">
-            {/* //TODO i18n */}
-            Cette commande n&apos;existe pas ou vous n&apos;y avez pas accès.
+            <T>{"Cette commande n'existe pas ou vous n'y avez pas accès."}</T>
           </p>
           <Link
             href="/account/orders"
@@ -208,7 +208,7 @@ export default function OrderDetailPage() {
             style={{ background: '#00a8b5' }}
           >
             <ArrowLeft className="w-4 h-4" />
-            {/* //TODO i18n */}Voir toutes mes commandes
+            <T>Voir toutes mes commandes</T>
           </Link>
         </div>
       </div>
@@ -245,7 +245,7 @@ export default function OrderDetailPage() {
             ) : (
               <StatusIcon className="w-3.5 h-3.5" />
             )}
-            {ORDER_STATUS_LABELS[order.status]}
+            <T>{ORDER_STATUS_LABELS[order.status]}</T>
           </span>
         </div>
 
@@ -258,7 +258,7 @@ export default function OrderDetailPage() {
           <div className="flex items-center gap-2 mb-4">
             <Package className="w-4 h-4 text-slate-400" />
             <h2 className="font-semibold text-slate-800 text-sm">
-              {/* //TODO i18n */}Articles ({order.items?.length ?? 0})
+              <T>Articles</T> ({order.items?.length ?? 0})
             </h2>
           </div>
           <div className="space-y-3">
@@ -312,7 +312,7 @@ export default function OrderDetailPage() {
             )}
             {order.discount !== undefined && order.discount > 0 && (
               <div className="flex justify-between text-xs text-emerald-600">
-                <span>{/* //TODO i18n */}Remise</span>
+                <span><T>Remise</T></span>
                 <span>- {fmt(order.discount)} €</span>
               </div>
             )}
@@ -365,12 +365,12 @@ export default function OrderDetailPage() {
             </p>
           ) : (
             <p className="text-sm text-slate-400">
-              {/* //TODO i18n */}Aucune adresse renseignée
+              <T>Aucune adresse renseignée</T>
             </p>
           )}
           {order.shippingMethod?.name && (
             <p className="text-xs text-slate-400 mt-3 pt-3 border-t border-slate-100">
-              {/* //TODO i18n */}Mode de livraison : {order.shippingMethod.name}
+              <T>Mode de livraison</T> : <T>{order.shippingMethod.name}</T>
             </p>
           )}
         </motion.div>
@@ -385,12 +385,11 @@ export default function OrderDetailPage() {
           <div className="flex items-center gap-2 mb-3">
             <FileText className="w-4 h-4 text-slate-400" />
             <h2 className="font-semibold text-slate-800 text-sm">
-              {/* //TODO i18n */}Facture
+              <T>Facture</T>
             </h2>
           </div>
           <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-            {/* //TODO i18n */}
-            Téléchargez votre facture au format PDF pour vos archives comptables.
+            <T>Téléchargez votre facture au format PDF pour vos archives comptables.</T>
           </p>
           <button
             onClick={handleDownloadInvoice}
@@ -403,8 +402,7 @@ export default function OrderDetailPage() {
             ) : (
               <FileText className="w-4 h-4" />
             )}
-            {/* //TODO i18n */}
-            {downloadingInvoice ? 'Téléchargement…' : 'Télécharger la facture (PDF)'}
+            <T>{downloadingInvoice ? 'Téléchargement…' : 'Télécharger la facture (PDF)'}</T>
           </button>
         </motion.div>
 
@@ -420,12 +418,10 @@ export default function OrderDetailPage() {
               <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-semibold text-slate-800 text-sm">
-                  {/* //TODO i18n */}Annuler cette commande
+                  <T>Annuler cette commande</T>
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  {/* //TODO i18n */}
-                  Vous pouvez annuler tant qu&apos;elle n&apos;est pas encore en
-                  préparation.
+                  <T>{"Vous pouvez annuler tant qu'elle n'est pas encore en préparation."}</T>
                 </p>
               </div>
             </div>
@@ -436,7 +432,7 @@ export default function OrderDetailPage() {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors"
               >
                 <XCircle className="w-4 h-4" />
-                {/* //TODO i18n */}Annuler la commande
+                <T>Annuler la commande</T>
               </button>
             ) : (
               <div className="flex flex-col sm:flex-row gap-2">
@@ -450,7 +446,7 @@ export default function OrderDetailPage() {
                   ) : (
                     <XCircle className="w-4 h-4" />
                   )}
-                  {/* //TODO i18n */}Confirmer l&apos;annulation
+                  <T>{"Confirmer l'annulation"}</T>
                 </button>
                 <button
                   onClick={() => setConfirmingCancel(false)}

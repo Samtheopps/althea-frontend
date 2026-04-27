@@ -27,6 +27,7 @@ import accountService, {
   ORDER_STATUS_LABELS,
 } from '@/services/accountService';
 import type { Order, OrderStatus } from '@/types/account';
+import { T } from '@/components/ui/TranslatedText';
 
 const STATUS_META: Record<
   OrderStatus,
@@ -155,7 +156,7 @@ export default function AccountPage() {
               </div>
               <div>
                 <h1 className="font-heading font-bold text-2xl text-slate-800">
-                  Bonjour, {user.firstName} {/* //TODO i18n */}
+                  <T>Bonjour</T>, {user.firstName}
                 </h1>
                 <p className="text-sm text-slate-500 mt-0.5">{user.email}</p>
               </div>
@@ -175,7 +176,7 @@ export default function AccountPage() {
         {/* Shortcut cards */}
         <section>
           <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-3">
-            {/* //TODO i18n */}Raccourcis
+            <T>Raccourcis</T>
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {shortcuts.map((s, idx) => {
@@ -197,8 +198,8 @@ export default function AccountPage() {
                     >
                       <Icon className="w-5 h-5" style={{ color: '#00a8b5' }} />
                     </div>
-                    <h3 className="font-semibold text-slate-800 text-sm mb-1">{s.label}</h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">{s.desc}</p>
+                    <h3 className="font-semibold text-slate-800 text-sm mb-1"><T>{s.label}</T></h3>
+                    <p className="text-xs text-slate-500 leading-relaxed"><T>{s.desc}</T></p>
                   </Link>
                 </motion.div>
               );
@@ -210,13 +211,13 @@ export default function AccountPage() {
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">
-              {/* //TODO i18n */}Dernières commandes
+              <T>Dernières commandes</T>
             </h2>
             <Link
               href="/account/orders"
               className="text-xs text-primary font-semibold hover:underline"
             >
-              {/* //TODO i18n */}Tout voir
+              <T>Tout voir</T>
             </Link>
           </div>
 
@@ -252,7 +253,7 @@ export default function AccountPage() {
                 href="/products"
                 className="inline-block mt-3 text-xs font-semibold text-primary hover:underline"
               >
-                {/* //TODO i18n */}Découvrir nos produits
+                <T>Découvrir nos produits</T>
               </Link>
             </div>
           ) : (
@@ -271,7 +272,7 @@ export default function AccountPage() {
                       style={{ color: meta.color, background: meta.bg }}
                     >
                       <StatusIcon className="w-3.5 h-3.5" />
-                      {ORDER_STATUS_LABELS[order.status]}
+                      <T>{ORDER_STATUS_LABELS[order.status]}</T>
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-slate-800 text-sm truncate">
