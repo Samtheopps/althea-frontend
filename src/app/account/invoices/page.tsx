@@ -19,6 +19,8 @@ import toast from 'react-hot-toast';
 
 import { useAuthStore } from '@/stores/authStore';
 import invoiceService, { getInvoiceErrorMessage } from '@/services/invoiceService';
+import { T } from '@/components/ui/TranslatedText';
+import { useTranslated } from '@/hooks/useTranslated';
 import {
   type Invoice,
   type InvoiceStatus,
@@ -64,6 +66,7 @@ export default function InvoicesPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const searchPlaceholder = useTranslated('Rechercher par numéro de facture…');
 
   useEffect(() => {
     if (!user) router.replace('/login');
@@ -123,7 +126,7 @@ export default function InvoicesPage() {
           className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          {/* //TODO i18n */}Retour à mon compte
+          <T>Retour à mon compte</T>
         </Link>
 
         {/* Header */}
@@ -136,10 +139,10 @@ export default function InvoicesPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-slate-800">
-              {/* //TODO i18n */}Mes factures
+              <T>Mes factures</T>
             </h1>
             <p className="text-xs text-slate-500 mt-0.5">
-              {/* //TODO i18n */}Téléchargez ou consultez vos factures.
+              <T>Téléchargez ou consultez vos factures.</T>
             </p>
           </div>
         </div>
@@ -154,7 +157,7 @@ export default function InvoicesPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher par numéro de facture…" //TODO i18n
+                placeholder={searchPlaceholder}
                 className="w-full pl-10 pr-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00a8b5]/20 focus:border-[#00a8b5] focus:bg-white transition-all"
               />
             </div>
@@ -175,7 +178,7 @@ export default function InvoicesPage() {
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
-                  {opt.label}
+                  <T>{opt.label}</T>
                 </button>
               ))}
             </div>
@@ -210,14 +213,12 @@ export default function InvoicesPage() {
               <FileText className="w-7 h-7" style={{ color: '#00a8b5' }} />
             </div>
             <h3 className="font-semibold text-slate-800 text-sm mb-1">
-              {/* //TODO i18n */}
-              {searchQuery || statusFilter !== 'all'
+              <T>{searchQuery || statusFilter !== 'all'
                 ? 'Aucune facture ne correspond aux filtres.'
-                : 'Aucune facture pour le moment.'}
+                : 'Aucune facture pour le moment.'}</T>
             </h3>
             <p className="text-xs text-slate-500 mt-1">
-              {/* //TODO i18n */}
-              Les factures apparaîtront ici dès votre première commande payée.
+              <T>Les factures apparaîtront ici dès votre première commande payée.</T>
             </p>
           </div>
         ) : (
@@ -253,7 +254,7 @@ export default function InvoicesPage() {
                             className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
                             style={{ color: styles.color, background: styles.bg }}
                           >
-                            {label}
+                            <T>{label}</T>
                           </span>
                         </div>
                         <p className="text-xs text-slate-500 mt-1">
@@ -265,7 +266,7 @@ export default function InvoicesPage() {
                                 href={`/account/orders/${inv.orderId}`}
                                 className="hover:text-[#00a8b5] hover:underline"
                               >
-                                {/* //TODO i18n */}Voir la commande
+                                <T>Voir la commande</T>
                               </Link>
                             </>
                           )}
@@ -281,7 +282,7 @@ export default function InvoicesPage() {
                         href={`/account/invoices/${inv.id}`}
                         className="text-xs font-semibold text-[#00a8b5] hover:underline whitespace-nowrap"
                       >
-                        {/* //TODO i18n */}Détails
+                        <T>Détails</T>
                       </Link>
                       <button
                         onClick={() => handleDownload(inv)}
@@ -313,17 +314,17 @@ export default function InvoicesPage() {
               className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:border-[#00a8b5] hover:text-[#00a8b5] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
-              {/* //TODO i18n */}Précédent
+              <T>Précédent</T>
             </button>
             <span className="text-xs text-slate-500 px-3">
-              {/* //TODO i18n */}Page {page} / {totalPages}
+              <T>Page</T> {page} / {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
               className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:border-[#00a8b5] hover:text-[#00a8b5] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              {/* //TODO i18n */}Suivant
+              <T>Suivant</T>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>

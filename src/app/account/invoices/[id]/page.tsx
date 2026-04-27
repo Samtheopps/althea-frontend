@@ -19,6 +19,7 @@ import toast from 'react-hot-toast';
 
 import { useAuthStore } from '@/stores/authStore';
 import invoiceService, { getInvoiceErrorMessage } from '@/services/invoiceService';
+import { T } from '@/components/ui/TranslatedText';
 import {
   type Invoice,
   INVOICE_STATUS_LABELS,
@@ -148,13 +149,13 @@ export default function InvoiceDetailPage() {
         <div className="text-center">
           <AlertTriangle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <h2 className="font-semibold text-slate-800 text-sm mb-2">
-            {/* //TODO i18n */}Facture introuvable
+            <T>Facture introuvable</T>
           </h2>
           <Link
             href="/account/invoices"
             className="text-sm text-[#00a8b5] hover:underline"
           >
-            {/* //TODO i18n */}Retour à mes factures
+            <T>Retour à mes factures</T>
           </Link>
         </div>
       </div>
@@ -173,7 +174,7 @@ export default function InvoiceDetailPage() {
           className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          {/* //TODO i18n */}Retour à mes factures
+          <T>Retour à mes factures</T>
         </Link>
 
         {/* Header */}
@@ -192,15 +193,15 @@ export default function InvoiceDetailPage() {
                   className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
                   style={{ color: styles.color, background: styles.bg }}
                 >
-                  {label}
+                  <T>{label}</T>
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-1">
-                {/* //TODO i18n */}Émise le {fmtDate(invoice.issuedAt)}
+                <T>Émise le</T> {fmtDate(invoice.issuedAt)}
                 {invoice.paidAt && (
                   <>
                     {' · '}
-                    {/* //TODO i18n */}Payée le {fmtDate(invoice.paidAt)}
+                    <T>Payée le</T> {fmtDate(invoice.paidAt)}
                   </>
                 )}
               </p>
@@ -218,8 +219,7 @@ export default function InvoiceDetailPage() {
             ) : (
               <Download className="w-4 h-4" />
             )}
-            {/* //TODO i18n */}
-            {downloading ? 'Téléchargement…' : 'Télécharger PDF'}
+            <T>{downloading ? 'Téléchargement…' : 'Télécharger PDF'}</T>
           </button>
         </div>
 
@@ -233,7 +233,7 @@ export default function InvoiceDetailPage() {
             <div className="border-b border-slate-100 px-5 py-3 flex items-center gap-2">
               <FileText className="w-4 h-4 text-slate-400" />
               <h2 className="font-semibold text-slate-800 text-sm">
-                {/* //TODO i18n */}Aperçu
+                <T>Aperçu</T>
               </h2>
             </div>
             <div className="bg-slate-50" style={{ minHeight: '700px' }}>
@@ -241,7 +241,7 @@ export default function InvoiceDetailPage() {
                 <div className="flex flex-col items-center justify-center h-[700px] gap-3">
                   <Loader2 className="w-6 h-6 text-[#00a8b5] animate-spin" />
                   <p className="text-xs text-slate-500">
-                    {/* //TODO i18n */}Génération de l&apos;aperçu…
+                    <T>{"Génération de l'aperçu…"}</T>
                   </p>
                 </div>
               ) : pdfUrl ? (
@@ -255,8 +255,7 @@ export default function InvoiceDetailPage() {
                 <div className="flex flex-col items-center justify-center h-[700px] gap-3 px-6">
                   <FileText className="w-10 h-10 text-slate-300" />
                   <p className="text-xs text-slate-500 text-center">
-                    {/* //TODO i18n */}
-                    Aperçu indisponible. Utilisez le bouton « Télécharger PDF ».
+                    <T>{"Aperçu indisponible. Utilisez le bouton Télécharger PDF."}</T>
                   </p>
                 </div>
               )}
@@ -273,24 +272,24 @@ export default function InvoiceDetailPage() {
               className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5"
             >
               <h3 className="font-semibold text-slate-800 text-sm mb-3">
-                {/* //TODO i18n */}Montants
+                <T>Montants</T>
               </h3>
               <dl className="space-y-2 text-xs">
                 <div className="flex justify-between">
-                  <dt className="text-slate-500">{/* //TODO i18n */}Sous-total HT</dt>
+                  <dt className="text-slate-500"><T>Sous-total HT</T></dt>
                   <dd className="font-medium text-slate-700">
                     {fmtMoney(invoice.subtotalHt, invoice.currency)}
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-slate-500">{/* //TODO i18n */}TVA</dt>
+                  <dt className="text-slate-500"><T>TVA</T></dt>
                   <dd className="font-medium text-slate-700">
                     {fmtMoney(invoice.totalVat, invoice.currency)}
                   </dd>
                 </div>
                 <div className="flex justify-between pt-2 border-t border-slate-100">
                   <dt className="font-semibold text-slate-800">
-                    {/* //TODO i18n */}Total TTC
+                    <T>Total TTC</T>
                   </dt>
                   <dd className="font-bold text-slate-800 text-sm">
                     {fmtMoney(invoice.totalTtc, invoice.currency)}
@@ -310,7 +309,7 @@ export default function InvoiceDetailPage() {
                 <div className="flex items-center gap-2 mb-3">
                   <UserIcon className="w-4 h-4 text-slate-400" />
                   <h3 className="font-semibold text-slate-800 text-sm">
-                    {/* //TODO i18n */}Client
+                    <T>Client</T>
                   </h3>
                 </div>
                 <p className="text-xs text-slate-700 font-medium">
@@ -335,7 +334,7 @@ export default function InvoiceDetailPage() {
                 <div className="flex items-center gap-2 mb-3">
                   <MapPin className="w-4 h-4 text-slate-400" />
                   <h3 className="font-semibold text-slate-800 text-sm">
-                    {/* //TODO i18n */}Adresse de facturation
+                    <T>Adresse de facturation</T>
                   </h3>
                 </div>
                 <address className="text-xs text-slate-600 not-italic leading-relaxed">
@@ -372,7 +371,7 @@ export default function InvoiceDetailPage() {
                 >
                   <Package className="w-4 h-4 text-slate-400" />
                   <span className="text-xs font-semibold text-slate-700">
-                    {/* //TODO i18n */}Voir la commande associée
+                    <T>Voir la commande associée</T>
                   </span>
                 </Link>
               </motion.div>
@@ -390,21 +389,21 @@ export default function InvoiceDetailPage() {
           >
             <div className="border-b border-slate-100 px-5 py-3">
               <h3 className="font-semibold text-slate-800 text-sm">
-                {/* //TODO i18n */}Articles facturés
+                <T>Articles facturés</T>
               </h3>
             </div>
             <div className="divide-y divide-slate-100">
               {invoice.items.map((item, idx) => (
                 <div key={idx} className="px-5 py-3 flex items-center gap-4">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-slate-800 truncate">{item.productName}</p>
+                    <p className="text-sm text-slate-800 truncate"><T>{item.productName}</T></p>
                     {item.variantName && (
-                      <p className="text-xs text-slate-500 truncate">{item.variantName}</p>
+                      <p className="text-xs text-slate-500 truncate"><T>{item.variantName}</T></p>
                     )}
                   </div>
                   <span className="text-xs text-slate-500 w-10 text-right">×{item.quantity}</span>
                   <span className="text-xs text-slate-500 w-20 text-right">
-                    {/* //TODO i18n */}TVA {(item.vatRate * 100).toFixed(0)}%
+                    <T>TVA</T> {(item.vatRate * 100).toFixed(0)}%
                   </span>
                   <span className="text-sm font-semibold text-slate-800 w-24 text-right">
                     {fmtMoney(

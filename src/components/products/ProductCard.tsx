@@ -18,9 +18,9 @@ interface ProductCardProps {
 }
 
 function StockBadge({ stock }: { stock: number }) {
-  if (stock > 10) return <span className="stock-in">En stock</span>;
-  if (stock > 0)  return <span className="stock-low">Stock faible — {stock}</span>;
-  return <span className="stock-out">Rupture de stock</span>;
+  if (stock > 10) return <span className="stock-in"><T>En stock</T></span>;
+  if (stock > 0)  return <span className="stock-low"><T>Stock faible</T> — {stock}</span>;
+  return <span className="stock-out"><T>Rupture de stock</T></span>;
 }
 
 export function ProductCard({ product, viewMode = 'grid' }: ProductCardProps) {

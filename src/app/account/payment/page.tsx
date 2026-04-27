@@ -18,6 +18,8 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useI18n } from '@/lib/i18n';
 import accountService, { getAccountErrorMessage } from '@/services/accountService';
+import { T } from '@/components/ui/TranslatedText';
+import { useTranslated } from '@/hooks/useTranslated';
 import type { PaymentMethod } from '@/types/account';
 
 /**
@@ -57,6 +59,7 @@ export default function AccountPaymentPage() {
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const setDefaultLabel = useTranslated('Définir par défaut');
 
   useEffect(() => {
     if (!user) router.replace('/login');
@@ -141,9 +144,7 @@ export default function AccountPaymentPage() {
         <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-100 mb-6">
           <Info className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-amber-800 leading-relaxed">
-            {/* //TODO i18n */}
-            Pour ajouter une carte, utilisez-la lors de votre prochain paiement et cochez
-            « Enregistrer ce moyen de paiement ». Elle apparaîtra ici automatiquement.
+            <T>{"Pour ajouter une carte, utilisez-la lors de votre prochain paiement et cochez « Enregistrer ce moyen de paiement ». Elle apparaîtra ici automatiquement."}</T>
           </p>
         </div>
 
@@ -218,7 +219,7 @@ export default function AccountPaymentPage() {
                             )}
                           </div>
                           <p className="text-xs text-slate-500 mt-0.5">
-                            {brandLabel(m.brand)} — expire le{' '}
+                            {brandLabel(m.brand)} — <T>expire le</T>{' '}
                             {String(m.expMonth).padStart(2, '0')}/{m.expYear}
                           </p>
                         </div>
@@ -229,7 +230,7 @@ export default function AccountPaymentPage() {
                             onClick={() => handleSetDefault(m.id)}
                             disabled={isPending}
                             className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-amber-500 transition-colors disabled:opacity-50"
-                            title="Définir par défaut" //TODO i18n
+                            title={setDefaultLabel}
                           >
                             {isPending ? (
                               <Loader2 className="w-4 h-4 animate-spin" />

@@ -20,6 +20,7 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useI18n } from '@/lib/i18n';
 import accountService, { getAccountErrorMessage } from '@/services/accountService';
+import { T } from '@/components/ui/TranslatedText';
 
 interface ProfileForm {
   firstName: string;
@@ -221,7 +222,7 @@ export default function AccountSettingsPage() {
             </div>
             <div>
               <h2 className="font-semibold text-slate-800">
-                {/* //TODO i18n */}Changer mon email
+                <T>Changer mon email</T>
               </h2>
               <p className="text-xs text-slate-500">{tr.account.emailChangeNote}</p>
             </div>
@@ -244,9 +245,7 @@ export default function AccountSettingsPage() {
                 placeholder="nouveau@email.com"
               />
               <p className="text-xs text-slate-400 mt-1.5">
-                {/* //TODO i18n */}
-                Un email de confirmation sera envoyé à la nouvelle adresse. Le
-                changement ne sera effectif qu&apos;après vérification.
+                <T>{"Un email de confirmation sera envoyé à la nouvelle adresse. Le changement ne sera effectif qu'après vérification."}</T>
               </p>
             </div>
             <button
@@ -259,7 +258,7 @@ export default function AccountSettingsPage() {
               ) : (
                 <Send className="w-4 h-4" />
               )}
-              {/* //TODO i18n */}Envoyer l&apos;email de vérification
+              <T>{"Envoyer l'email de vérification"}</T>
             </button>
           </form>
         </motion.div>
